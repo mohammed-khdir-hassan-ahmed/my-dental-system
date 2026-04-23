@@ -22,6 +22,10 @@ interface DashboardStats {
   uniquePatients: number
   activeStaff: number
   pendingInstallmentsAmount: number
+  monthlyInstallmentAmount: number
+  patientsWithInstallments: number
+  totalSalaries: number
+  totalAdvancesThisMonth: number
   appointmentTrend: number
   revenueTrend: number
 }
@@ -88,7 +92,7 @@ export const SectionCards = memo(function SectionCards() {
   const formatCompact = (amount: number | undefined) => {
     const val = amount || 0
     if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`
+    if (val >= 1000) return `${(val / 1000).toFixed(0)} هەزار`
     return val.toString()
   }
 
@@ -154,24 +158,24 @@ export const SectionCards = memo(function SectionCards() {
               {stats.appointmentTrend >= 0 ? '+' : ''}{stats.appointmentTrend.toFixed(1)}%
             </div>
           </div>
-          <p className="text-sm font-semibold text-blue-100 mb-1">دانیشتەکانی ئەم مانگە</p>
+          <p className="text-sm font-semibold text-blue-100 mb-1">کۆی موچەی کارمەندەکان</p>
           <h3 className="text-2xl font-bold text-white tabular-nums leading-none mb-4">
-            {stats.appointmentsCount}
+            {formatCurrency(stats.totalSalaries)}
           </h3>
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
-              <div className="flex items-center justify-center gap-1 mb-0.5">
-                <UsersIcon className="size-3 text-blue-200" />
-                <p className="text-[10px] font-medium text-blue-200">نەخۆشەکان</p>
-              </div>
-              <p className="text-xs font-bold text-white">{formatNumber(stats.uniquePatients)}</p>
-            </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <UsersIcon className="size-3 text-blue-200" />
                 <p className="text-[10px] font-medium text-blue-200">کارمەند</p>
               </div>
               <p className="text-xs font-bold text-white">{stats.activeStaff}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                <CalendarIcon className="size-3 text-blue-200" />
+                <p className="text-[10px] font-medium text-blue-200">دانیشتەکان</p>
+              </div>
+              <p className="text-xs font-bold text-white">{stats.appointmentsCount}</p>
             </div>
           </div>
           <div className="mt-3 pt-2 border-t border-white/20">
@@ -189,35 +193,36 @@ export const SectionCards = memo(function SectionCards() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
-              <ReceiptIcon className="size-5 text-white" />
+              <DollarSignIcon className="size-5 text-white" />
             </div>
             <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-sm text-white">
-              سەرەبرین
+              داهات
             </div>
           </div>
-          <p className="text-sm font-semibold text-rose-100 mb-1">کۆی سەرەبرین</p>
+          <p className="text-sm font-semibold text-rose-100 mb-1">کۆی داهاتی فرۆشتن</p>
           <h3 className="text-2xl font-bold text-white tabular-nums leading-none mb-4">
-            {formatCurrency(stats.totalExpenses)}
+            {formatCurrency(stats.salesRevenue)}
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
               <div className="flex items-center justify-center gap-1 mb-0.5">
-                <DollarSignIcon className="size-3 text-rose-200" />
-                <p className="text-[10px] font-medium text-rose-200">داهات</p>
+                <CalendarIcon className="size-3 text-rose-200" />
+                <p className="text-[10px] font-medium text-rose-200">نەخۆشەکان
+                </p>
               </div>
-              <p className="text-xs font-bold text-white">{formatCompact(stats.totalRevenue)}</p>
+              <p className="text-xs font-bold text-white">{stats.appointmentsCount}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
               <div className="flex items-center justify-center gap-1 mb-0.5">
-                <TrendingUpIcon className="size-3 text-rose-200" />
-                <p className="text-[10px] font-medium text-rose-200">قازانج</p>
+                <ShoppingCartIcon className="size-3 text-rose-200" />
+                <p className="text-[10px] font-medium text-rose-200">فرۆشتن</p>
               </div>
-              <p className={`text-xs font-bold ${stats.netProfit >= 0 ? 'text-emerald-200' : 'text-red-200'}`}>{formatCompact(stats.netProfit)}</p>
+              <p className="text-xs font-bold text-white">{formatCompact(stats.salesRevenue)}</p>
             </div>
           </div>
           <div className="mt-3 pt-2 border-t border-white/20">
             <p className="text-xs text-rose-100">
-              قازانج: {formatCurrency(stats.netProfit)}
+              فرۆشتن: {formatCurrency(stats.salesRevenue)}
             </p>
           </div>
         </div>
@@ -244,16 +249,16 @@ export const SectionCards = memo(function SectionCards() {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <DollarSignIcon className="size-3 text-amber-200" />
-                <p className="text-[10px] font-medium text-amber-200">کۆی داهات</p>
+                <p className="text-[10px] font-medium text-amber-200">قیستی مانگانە</p>
               </div>
-              <p className="text-xs font-bold text-white">{formatCompact(stats.totalRevenue)}</p>
+              <p className="text-xs font-bold text-white">{formatCompact(stats.monthlyInstallmentAmount)}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 text-center">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <UsersIcon className="size-3 text-amber-200" />
-                <p className="text-[10px] font-medium text-amber-200">نەخۆشانی ئەمرۆ</p>
+                <p className="text-[10px] font-medium text-amber-200">نەخۆشانی قیست</p>
               </div>
-              <p className="text-xs font-bold text-white">{stats.todayPatientsCount || 0}</p>
+              <p className="text-xs font-bold text-white">{stats.patientsWithInstallments || 0}</p>
             </div>
           </div>
           <div className="mt-3 pt-2 border-t border-white/20">

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { 
-  appointmentsTable, 
-  staffTable, 
-  salesTable, 
+import {
+  appointmentsTable,
+  staffTable,
+  salesTable,
   expensesTable,
-  installmentsTable 
+  installmentsTable,
+  monthlyRecordsTable,
+  transactionsTable
 } from '@/db/schema';
 import { sql, and, gte, lt, desc, eq } from 'drizzle-orm';
 
@@ -148,12 +150,17 @@ export async function GET(request: Request) {
     
     const todayPatientsCount = todayAppointments.filter(apt => Number(apt.money || 0) > 0).length;
 
-    // Get staff count
+    // Get staff count and total salaries
     const staff = await db.select().from(staffTable);
     const activeStaff = staff.filter(s => s.status === 'Active').length;
+    const totalSalaries = staff.reduce((sum, s) => sum + Number(s.basicSalary || 0), 0);
 
     // Get unique patients (by phone number)
     const uniquePatients = new Set(allAppointments.map(apt => apt.phone)).size;
+
+    // Get total advances for this month
+    // Note: Since there's no database column for advances, this is calculated elsewhere
+    const totalAdvancesThisMonth = 0;
 
     // Get all installments for total pending amount
     const allInstallments = await db
@@ -161,9 +168,22 @@ export async function GET(request: Request) {
       .from(installmentsTable);
 
     const pendingInstallmentsAmount = allInstallments.reduce(
-      (sum, inst) => sum + Number(inst.remainingAmount || 0), 
+      (sum, inst) => sum + Number(inst.remainingAmount || 0),
       0
     );
+
+    // Calculate total monthly installment amount (sum of installmentValue for active installments)
+    const monthlyInstallmentAmount = allInstallments.reduce(
+      (sum, inst) => sum + Number(inst.installmentValue || 0),
+      0
+    );
+
+    // Count patients with installments (unique patients with remaining balance > 0)
+    const patientsWithInstallments = new Set(
+      allInstallments
+        .filter(inst => Number(inst.remainingAmount || 0) > 0)
+        .map(inst => inst.patientName)
+    ).size;
 
     // Calculate trends
     const appointmentTrend = prevMonthAppointments.length > 0 
@@ -238,6 +258,9 @@ export async function GET(request: Request) {
         uniquePatients,
         activeStaff,
         pendingInstallmentsAmount,
+        monthlyInstallmentAmount,
+        totalSalaries,
+        patientsWithInstallments,
         appointmentTrend,
         revenueTrend,
         treatmentBreakdown: currentPeriodAppointments.reduce((acc: Record<string, number>, apt) => {
