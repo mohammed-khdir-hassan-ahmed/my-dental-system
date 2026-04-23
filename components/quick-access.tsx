@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { memo } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
   CalendarIcon, 
@@ -69,7 +70,7 @@ const quickAccessItems = [
   },
 ]
 
-export function QuickAccess() {
+export const QuickAccess = memo(function QuickAccess() {
   return (
     <div className="px-4 lg:px-6">
       <Card className="border-0  bg-white dark:bg-slate-900">
@@ -114,4 +115,4 @@ export function QuickAccess() {
     </Card>
     </div>
   )
-}
+})

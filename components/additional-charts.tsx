@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { memo } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -18,7 +19,7 @@ const revenueData = [
   { name: "قیست", value: 10, color: "#8b5cf6" },
 ]
 
-export function AdditionalCharts() {
+export const AdditionalCharts = memo(function AdditionalCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="border-0 shadow-xl bg-white dark:bg-slate-900">
@@ -102,4 +103,4 @@ export function AdditionalCharts() {
       </Card>
     </div>
   )
-}
+})

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { installmentsTable } from '@/db/schema';
+import { installmentsTable, paymentHistoryTable } from '@/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -129,6 +129,11 @@ export async function DELETE(request: Request) {
         { status: 400 }
       );
     }
+
+    // Delete related payment history first to avoid foreign key constraint
+    await db
+      .delete(paymentHistoryTable)
+      .where(eq(paymentHistoryTable.installmentId, parseInt(id)));
 
     await db
       .delete(installmentsTable)

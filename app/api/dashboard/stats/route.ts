@@ -7,9 +7,10 @@ import {
   expensesTable,
   installmentsTable 
 } from '@/db/schema';
-import { sql, and, gte, lt, desc } from 'drizzle-orm';
+import { sql, and, gte, lt, desc, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 30; // Revalidate every 30 seconds
 
 function getMonthStart(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -20,7 +21,10 @@ function getNextMonthStart(date = new Date()) {
 }
 
 function toDateOnly(date: Date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export async function GET(request: Request) {
@@ -107,7 +111,7 @@ export async function GET(request: Request) {
 
     const totalRevenue = currentPeriodRevenue + salesRevenue;
 
-    // Get expenses
+    // Get expenses for current period (this month)
     const currentPeriodExpenses = await db
       .select()
       .from(expensesTable)
@@ -123,6 +127,27 @@ export async function GET(request: Request) {
       0
     );
 
+    // Calculate expenses breakdown by category
+    const expensesBreakdown = currentPeriodExpenses.reduce((acc: Record<string, number>, exp) => {
+      const category = exp.category || 'خەرجی گشتی';
+      acc[category] = (acc[category] || 0) + Number(exp.amount || 0);
+      return acc;
+    }, {});
+
+    // Get today's appointment payments (money from patients who came today)
+    const todayStr = toDateOnly(now);
+    const todayAppointments = await db
+      .select()
+      .from(appointmentsTable)
+      .where(eq(appointmentsTable.appointmentDate, todayStr));
+    
+    const todayPaymentsTotal = todayAppointments.reduce(
+      (sum, apt) => sum + Number(apt.money || 0), 
+      0
+    );
+    
+    const todayPatientsCount = todayAppointments.filter(apt => Number(apt.money || 0) > 0).length;
+
     // Get staff count
     const staff = await db.select().from(staffTable);
     const activeStaff = staff.filter(s => s.status === 'Active').length;
@@ -130,13 +155,12 @@ export async function GET(request: Request) {
     // Get unique patients (by phone number)
     const uniquePatients = new Set(allAppointments.map(apt => apt.phone)).size;
 
-    // Get pending installments
-    const pendingInstallments = await db
+    // Get all installments for total pending amount
+    const allInstallments = await db
       .select()
-      .from(installmentsTable)
-      .where(sql`${installmentsTable.status} = 'Pending'`);
+      .from(installmentsTable);
 
-    const pendingInstallmentsAmount = pendingInstallments.reduce(
+    const pendingInstallmentsAmount = allInstallments.reduce(
       (sum, inst) => sum + Number(inst.remainingAmount || 0), 
       0
     );
@@ -204,7 +228,11 @@ export async function GET(request: Request) {
     return NextResponse.json({
       stats: {
         totalRevenue,
+        appointmentsRevenue: currentPeriodRevenue,
+        salesRevenue,
         totalExpenses,
+        todayExpenses: todayPaymentsTotal,
+        todayPatientsCount,
         netProfit: totalRevenue - totalExpenses,
         appointmentsCount: currentPeriodAppointments.length,
         uniquePatients,
@@ -212,6 +240,12 @@ export async function GET(request: Request) {
         pendingInstallmentsAmount,
         appointmentTrend,
         revenueTrend,
+        treatmentBreakdown: currentPeriodAppointments.reduce((acc: Record<string, number>, apt) => {
+          const type = apt.treatmentType || 'چارەسەری گشتی';
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {}),
+        expensesBreakdown,
       },
       chartData,
       recentAppointments,
