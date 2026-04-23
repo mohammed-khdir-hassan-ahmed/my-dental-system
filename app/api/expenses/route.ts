@@ -60,10 +60,41 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')?.trim() || '';
     const month = searchParams.get('month');
     const scope = searchParams.get('scope');
+    const period = searchParams.get('period') || 'month';
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
 
     const conditions: SQL[] = [];
 
-    if (scope !== 'all') {
+    // Handle custom date range
+    if (from && to) {
+      conditions.push(gte(expensesTable.date, from));
+      conditions.push(lt(expensesTable.date, to));
+    } 
+    // Handle period parameter if not using scope, month, or custom dates
+    else if (!scope && !month) {
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date;
+
+      if (period === 'today') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      } else if (period === 'week') {
+        const dayOfWeek = now.getDay();
+        const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        startDate = new Date(now.getFullYear(), now.getMonth(), diff);
+        endDate = new Date(now.getFullYear(), now.getMonth(), diff + 7);
+      } else if (period !== 'all') {
+        startDate = getMonthStart(now);
+        endDate = getNextMonthStart(now);
+      }
+
+      if (period !== 'all') {
+        conditions.push(gte(expensesTable.date, toDateOnly(startDate)));
+        conditions.push(lt(expensesTable.date, toDateOnly(endDate)));
+      }
+    } else if (scope !== 'all') {
       const now = new Date();
       const startDate = month ? new Date(`${month}-01`) : getMonthStart(now);
       const endDate = month ? getNextMonthStart(startDate) : getNextMonthStart(now);

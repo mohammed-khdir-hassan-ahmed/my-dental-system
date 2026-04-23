@@ -63,7 +63,7 @@ export function AdditionalCharts() {
 
       <Card className="border-0 shadow-xl bg-white dark:bg-slate-900">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-white">بەشبەندی داهات</CardTitle>
+          <CardTitle className="text-slate-900 dark:text-white">بەشی داهات</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>

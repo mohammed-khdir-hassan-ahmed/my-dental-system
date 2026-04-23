@@ -195,6 +195,9 @@ export default function ExpensesPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [timePeriod, setTimePeriod] = useState<'month' | 'week' | 'today' | 'all' | 'custom'>('month');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
 
@@ -245,6 +248,13 @@ export default function ExpensesPage() {
       if (search.trim()) {
         params.set('search', search.trim());
       }
+      
+      if (timePeriod === 'custom' && customStartDate && customEndDate) {
+        params.set('from', customStartDate);
+        params.set('to', customEndDate);
+      } else if (timePeriod !== 'custom') {
+        params.set('period', timePeriod);
+      }
 
       const response = await fetch(`/api/expenses${params.toString() ? `?${params.toString()}` : ''}`);
       if (!response.ok) {
@@ -262,7 +272,7 @@ export default function ExpensesPage() {
 
   useEffect(() => {
     fetchExpenses(searchTerm);
-  }, [searchTerm]);
+  }, [searchTerm, timePeriod, customStartDate, customEndDate]);
 
   const formatAmount = (amount: string | number) => currencyFormatter.format(Number(amount || 0));
 
@@ -640,7 +650,34 @@ export default function ExpensesPage() {
             className="pr-10 h-10"
           />
         </div>
-
+        <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
+          <SelectTrigger className="w-fit h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="month">ئەم مانگە</SelectItem>
+            <SelectItem value="week">ئەم حەفتەیە</SelectItem>
+            <SelectItem value="today">ئەمڕۆ</SelectItem>
+            <SelectItem value="all">سەرجەم</SelectItem>
+            <SelectItem value="custom">بەرواری تایبەت</SelectItem>
+          </SelectContent>
+        </Select>
+        {timePeriod === 'custom' && (
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="h-10"
+            />
+            <Input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="h-10"
+            />
+          </div>
+        )}
         <Button
           onClick={() => setAddOpen(true)}
           className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 active:shadow-inner px-4 py-2 whitespace-nowrap transition-all duration-150"

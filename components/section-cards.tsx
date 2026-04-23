@@ -64,135 +64,99 @@ export function SectionCards() {
   return (
     <div className="grid grid-cols-1 gap-4 px-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 lg:px-6">
       {/* Revenue Card */}
-      <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-500 p-5 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
-        <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+      <div className="relative group overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-emerald-100 dark:border-emerald-900/50 p-4 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300 hover:-translate-y-1">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/20 dark:to-transparent rounded-bl-3xl" />
         <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg">
-              <DollarSignIcon className="size-6 text-white" />
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <DollarSignIcon className="size-5 text-white" />
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              {stats.revenueTrend >= 0 ? <TrendingUpIcon className="size-3.5 text-white" /> : <TrendingDownIcon className="size-3.5 text-white" />}
-              <span className="text-xs font-semibold text-white">{stats.revenueTrend >= 0 ? '+' : ''}{stats.revenueTrend.toFixed(1)}%</span>
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${stats.revenueTrend >= 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+              {stats.revenueTrend >= 0 ? <TrendingUpIcon className="size-3" /> : <TrendingDownIcon className="size-3" />}
+              {stats.revenueTrend >= 0 ? '+' : ''}{stats.revenueTrend.toFixed(1)}%
             </div>
           </div>
-          <p className="text-xs font-semibold text-white/90 uppercase tracking-wide mb-1">کۆی داهات</p>
-          <h3 className="text-3xl font-extrabold text-white tabular-nums tracking-tight">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">کۆی داهات</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white tabular-nums leading-none">
             {formatCurrency(stats.totalRevenue)}
           </h3>
-          <div className="mt-4 pt-3 border-t border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className={`p-1.5 rounded-lg ${stats.revenueTrend >= 0 ? 'bg-white/20' : 'bg-white/10'}`}>
-                  {stats.revenueTrend >= 0 ? <TrendingUpIcon className="size-3 text-white" /> : <TrendingDownIcon className="size-3 text-white" />}
-                </div>
-                <p className="text-xs font-medium text-white/90">
-                  {stats.revenueTrend >= 0 ? 'بەرزبوون' : 'نزمبوون'}
-                </p>
-              </div>
-              <span className="text-xs text-white/70">مانگی پێشوو</span>
-            </div>
+          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {stats.revenueTrend >= 0 ? 'بەرزبوون' : 'نزمبوون'} بەرا بە مانگی پێشوو
+            </p>
           </div>
         </div>
       </div>
 
       {/* Appointments Card */}
-      <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-500 p-5 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
-        <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+      <div className="relative group overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-blue-100 dark:border-blue-900/50 p-4 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-transparent rounded-bl-3xl" />
         <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg">
-              <CalendarIcon className="size-6 text-white" />
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <CalendarIcon className="size-5 text-white" />
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              {stats.appointmentTrend >= 0 ? <TrendingUpIcon className="size-3.5 text-white" /> : <TrendingDownIcon className="size-3.5 text-white" />}
-              <span className="text-xs font-semibold text-white">{stats.appointmentTrend >= 0 ? '+' : ''}{stats.appointmentTrend.toFixed(1)}%</span>
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${stats.appointmentTrend >= 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+              {stats.appointmentTrend >= 0 ? <TrendingUpIcon className="size-3" /> : <TrendingDownIcon className="size-3" />}
+              {stats.appointmentTrend >= 0 ? '+' : ''}{stats.appointmentTrend.toFixed(1)}%
             </div>
           </div>
-          <p className="text-xs font-semibold text-white/90 uppercase tracking-wide mb-1">دانیشتەکانی ئەم مانگە</p>
-          <h3 className="text-3xl font-extrabold text-white tabular-nums tracking-tight">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">دانیشتەکانی ئەم مانگە</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white tabular-nums leading-none">
             {stats.appointmentsCount}
           </h3>
-          <div className="mt-4 pt-3 border-t border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className={`p-1.5 rounded-lg ${stats.appointmentTrend >= 0 ? 'bg-white/20' : 'bg-white/10'}`}>
-                  {stats.appointmentTrend >= 0 ? <TrendingUpIcon className="size-3 text-white" /> : <TrendingDownIcon className="size-3 text-white" />}
-                </div>
-                <p className="text-xs font-medium text-white/90">
-                  {stats.appointmentTrend >= 0 ? 'بەرزبوون' : 'نزمبوون'}
-                </p>
-              </div>
-              <span className="text-xs text-white/70">مانگی پێشوو</span>
-            </div>
+          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {stats.appointmentTrend >= 0 ? 'بەرزبوون' : 'نزمبوون'} بەرا بە مانگی پێشوو
+            </p>
           </div>
         </div>
       </div>
 
       {/* Patients Card */}
-      <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-purple-400 via-purple-500 to-pink-500 p-5 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
-        <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+      <div className="relative group overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-purple-100 dark:border-purple-900/50 p-4 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/20 dark:to-transparent rounded-bl-3xl" />
         <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg">
-              <UsersIcon className="size-6 text-white" />
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <UsersIcon className="size-5 text-white" />
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-white">کۆی گشتی</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+              کۆی گشتی
             </div>
           </div>
-          <p className="text-xs font-semibold text-white/90 uppercase tracking-wide mb-1">نەخۆشەکان</p>
-          <h3 className="text-3xl font-extrabold text-white tabular-nums tracking-tight">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">نەخۆشەکان</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white tabular-nums leading-none">
             {formatNumber(stats.uniquePatients)}
           </h3>
-          <div className="mt-4 pt-3 border-t border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className="p-1.5 rounded-lg bg-white/20">
-                  <UsersIcon className="size-3 text-white" />
-                </div>
-                <p className="text-xs font-medium text-white/90">
-                  کارمەندان
-                </p>
-              </div>
-              <span className="text-xs text-white/70">{stats.activeStaff} چالاک</span>
-            </div>
+          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {stats.activeStaff} کارمەند چالاک
+            </p>
           </div>
         </div>
       </div>
 
       {/* Installments Card */}
-      <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-amber-500 p-5 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
-        <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+      <div className="relative group overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-orange-100 dark:border-orange-900/50 p-4 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 hover:-translate-y-1">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/20 dark:to-transparent rounded-bl-3xl" />
         <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg">
-              <CreditCardIcon className="size-6 text-white" />
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <CreditCardIcon className="size-5 text-white" />
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-white">چاوەڕوان</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+              چاوەڕوان
             </div>
           </div>
-          <p className="text-xs font-semibold text-white/90 uppercase tracking-wide mb-1">قەرزی مانگانە</p>
-          <h3 className="text-3xl font-extrabold text-white tabular-nums tracking-tight">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">قەرزی مانگانە</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white tabular-nums leading-none">
             {formatCurrency(stats.pendingInstallmentsAmount)}
           </h3>
-          <div className="mt-4 pt-3 border-t border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className="p-1.5 rounded-lg bg-white/20">
-                  <CreditCardIcon className="size-3 text-white" />
-                </div>
-                <p className="text-xs font-medium text-white/90">
-                  قەرز
-                </p>
-              </div>
-              <span className="text-xs text-white/70">پێویستی کۆکردنەوە</span>
-            </div>
+          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              پێویستی کۆکردنەوە
+            </p>
           </div>
         </div>
       </div>

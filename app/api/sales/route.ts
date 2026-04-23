@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db/drizzle'
 import { salesTable } from '@/db/schema'
-import { eq, and, gte, lte, desc, ilike } from 'drizzle-orm'
+import { eq, and, gte, lte, lt, desc, ilike } from 'drizzle-orm'
+
+export const dynamic = 'force-dynamic'
+
+function getMonthStart(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getNextMonthStart(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+}
+
+function toDateOnly(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +23,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const from = searchParams.get('from')
     const to = searchParams.get('to')
+    const period = searchParams.get('period') || 'month'
 
     let conditions = []
 
@@ -18,12 +33,42 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    if (from) {
-      conditions.push(gte(salesTable.date, from))
-    }
+    // Handle period parameter
+    if (!from && !to) {
+      const now = new Date();
+      let startDate: Date
+      let endDate: Date
 
-    if (to) {
-      conditions.push(lte(salesTable.date, to))
+      if (period === 'today') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+      } else if (period === 'week') {
+        const dayOfWeek = now.getDay()
+        const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+        startDate = new Date(now.getFullYear(), now.getMonth(), diff)
+        endDate = new Date(now.getFullYear(), now.getMonth(), diff + 7)
+      } else if (period !== 'all') {
+        startDate = getMonthStart(now)
+        endDate = getNextMonthStart(now)
+      }
+
+      if (period !== 'all') {
+        const startDateStr = toDateOnly(startDate)
+        const endDateStr = toDateOnly(endDate)
+        conditions.push(gte(salesTable.date, startDateStr))
+        conditions.push(lt(salesTable.date, endDateStr))
+      }
+    } else if (from && to) {
+      conditions.push(gte(salesTable.date, from))
+      conditions.push(lt(salesTable.date, to))
+    } else {
+      if (from) {
+        conditions.push(gte(salesTable.date, from))
+      }
+
+      if (to) {
+        conditions.push(lt(salesTable.date, to))
+      }
     }
 
     const sales = await db

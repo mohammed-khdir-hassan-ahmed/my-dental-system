@@ -23,16 +23,36 @@ function toDateOnly(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const now = new Date();
-    const monthStart = getMonthStart(now);
-    const nextMonthStart = getNextMonthStart(now);
-    const monthStartStr = toDateOnly(monthStart);
-    const nextMonthStartStr = toDateOnly(nextMonthStart);
+    const { searchParams } = new URL(request.url)
+    const period = searchParams.get('period') || 'month'
 
-    // Get current month appointments
-    const currentMonthAppointments = await db
+    const now = new Date();
+    let startDate: Date
+    let endDate: Date
+
+    if (period === 'today') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    } else if (period === 'week') {
+      const dayOfWeek = now.getDay()
+      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+      startDate = new Date(now.getFullYear(), now.getMonth(), diff)
+      endDate = new Date(now.getFullYear(), now.getMonth(), diff + 7)
+    } else if (period === 'all') {
+      startDate = new Date(0)
+      endDate = new Date()
+    } else {
+      startDate = getMonthStart(now)
+      endDate = getNextMonthStart(now)
+    }
+
+    const monthStartStr = toDateOnly(startDate)
+    const nextMonthStartStr = toDateOnly(endDate)
+
+    // Get current period appointments
+    const currentPeriodAppointments = await db
       .select()
       .from(appointmentsTable)
       .where(
@@ -59,7 +79,7 @@ export async function GET() {
       );
 
     // Calculate revenue from appointments
-    const currentMonthRevenue = currentMonthAppointments.reduce(
+    const currentPeriodRevenue = currentPeriodAppointments.reduce(
       (sum, apt) => sum + Number(apt.money || 0), 
       0
     );
@@ -70,7 +90,7 @@ export async function GET() {
     );
 
     // Get sales revenue
-    const currentMonthSales = await db
+    const currentPeriodSales = await db
       .select()
       .from(salesTable)
       .where(
@@ -80,15 +100,15 @@ export async function GET() {
         )
       );
 
-    const salesRevenue = currentMonthSales.reduce(
+    const salesRevenue = currentPeriodSales.reduce(
       (sum, sale) => sum + Number(sale.totalPrice || 0), 
       0
     );
 
-    const totalRevenue = currentMonthRevenue + salesRevenue;
+    const totalRevenue = currentPeriodRevenue + salesRevenue;
 
     // Get expenses
-    const currentMonthExpenses = await db
+    const currentPeriodExpenses = await db
       .select()
       .from(expensesTable)
       .where(
@@ -98,7 +118,7 @@ export async function GET() {
         )
       );
 
-    const totalExpenses = currentMonthExpenses.reduce(
+    const totalExpenses = currentPeriodExpenses.reduce(
       (sum, exp) => sum + Number(exp.amount || 0), 
       0
     );
@@ -123,7 +143,7 @@ export async function GET() {
 
     // Calculate trends
     const appointmentTrend = prevMonthAppointments.length > 0 
-      ? ((currentMonthAppointments.length - prevMonthAppointments.length) / prevMonthAppointments.length) * 100
+      ? ((currentPeriodAppointments.length - prevMonthAppointments.length) / prevMonthAppointments.length) * 100
       : 0;
 
     const revenueTrend = prevMonthRevenue > 0
@@ -186,7 +206,7 @@ export async function GET() {
         totalRevenue,
         totalExpenses,
         netProfit: totalRevenue - totalExpenses,
-        appointmentsCount: currentMonthAppointments.length,
+        appointmentsCount: currentPeriodAppointments.length,
         uniquePatients,
         activeStaff,
         pendingInstallmentsAmount,

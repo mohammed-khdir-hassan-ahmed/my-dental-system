@@ -1,16 +1,73 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
 import { appointmentsTable } from '@/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, and, gte, lt } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+function getMonthStart(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getNextMonthStart(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+}
+
+function toDateOnly(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+export async function GET(request: Request) {
   try {
-    const appointments = await db
-      .select()
-      .from(appointmentsTable)
-      .orderBy(desc(appointmentsTable.createdAt));
+    const { searchParams } = new URL(request.url)
+    const period = searchParams.get('period') || 'month'
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
+
+    const now = new Date();
+    let startDate: Date
+    let endDate: Date
+
+    if (from && to) {
+      startDate = new Date(from)
+      endDate = new Date(to)
+    } else if (period === 'today') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    } else if (period === 'week') {
+      const dayOfWeek = now.getDay()
+      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+      startDate = new Date(now.getFullYear(), now.getMonth(), diff)
+      endDate = new Date(now.getFullYear(), now.getMonth(), diff + 7)
+    } else if (period === 'all') {
+      startDate = new Date(0)
+      endDate = new Date()
+    } else {
+      startDate = getMonthStart(now)
+      endDate = getNextMonthStart(now)
+    }
+
+    const startDateStr = toDateOnly(startDate)
+    const endDateStr = toDateOnly(endDate)
+
+    let appointments;
+    if (period === 'all' && !from && !to) {
+      appointments = await db
+        .select()
+        .from(appointmentsTable)
+        .orderBy(desc(appointmentsTable.createdAt));
+    } else {
+      appointments = await db
+        .select()
+        .from(appointmentsTable)
+        .where(
+          and(
+            gte(appointmentsTable.appointmentDate, startDateStr),
+            lt(appointmentsTable.appointmentDate, endDateStr)
+          )
+        )
+        .orderBy(desc(appointmentsTable.createdAt));
+    }
 
     return NextResponse.json(appointments, { status: 200 });
   } catch (error) {

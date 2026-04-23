@@ -98,6 +98,9 @@ export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timePeriod, setTimePeriod] = useState<'month' | 'week' | 'today' | 'all' | 'custom'>('month');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
@@ -163,7 +166,21 @@ export default function AppointmentsPage() {
 
   const fetchAppointments = async () => {
     try {
-      const response = await fetch('/api/appointments');
+      let url = '/api/appointments';
+      const params = new URLSearchParams();
+      
+      if (timePeriod === 'custom' && customStartDate && customEndDate) {
+        params.set('from', customStartDate);
+        params.set('to', customEndDate);
+      } else if (timePeriod !== 'custom') {
+        params.set('period', timePeriod);
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('بڕگە ڕانەگێڕاندن');
       }
@@ -178,7 +195,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [timePeriod, customStartDate, customEndDate]);
 
   const handleAddAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -395,6 +412,34 @@ export default function AppointmentsPage() {
             className="w-full rounded-lg border-border/90 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-10 h-10"
           />
         </div>
+        <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
+          <SelectTrigger className="w-fit h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="month">ئەم مانگە</SelectItem>
+            <SelectItem value="week">ئەم حەفتەیە</SelectItem>
+            <SelectItem value="today">ئەمڕۆ</SelectItem>
+            <SelectItem value="all">سەرجەم</SelectItem>
+            <SelectItem value="custom">بەرواری تایبەت</SelectItem>
+          </SelectContent>
+        </Select>
+        {timePeriod === 'custom' && (
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="h-10"
+            />
+            <Input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="h-10"
+            />
+          </div>
+        )}
         <Button 
           onClick={() => setOpenDialog(true)}
           className="bg-primary hover:shadow-lg hover:shadow-primary/30 gap-2 text-white font-semibold px-4 py-2 whitespace-nowrap"
@@ -526,8 +571,8 @@ export default function AppointmentsPage() {
       }}>
         <DialogContent dir="rtl" className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingAppointment ? 'دەستکاریکردنی نەخۆش' : 'زیادکردنی نەخۆش'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className='text-center'>{editingAppointment ? 'دەستکاریکردنی نەخۆش' : 'زیادکردنی نەخۆش'}</DialogTitle>
+            <DialogDescription className='text-center'>
               {editingAppointment ? 'زانیاریەکانی نەخۆشەکە دەستکاری بکە' : 'زانیاریەکانی نەخۆشە نوێەکە بنووسە'}
             </DialogDescription>
           </DialogHeader>
