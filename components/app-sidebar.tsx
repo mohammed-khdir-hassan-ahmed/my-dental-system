@@ -15,100 +15,103 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { LayoutDashboardIcon, ListIcon, UsersIcon, DollarSignIcon, TrendingDownIcon, BarChart3Icon, Cog, CalendarIcon } from "lucide-react"
+import { useUser } from "@/contexts/user-context"
 
-const data = {
-  user: {
-    name: "بەکارهێنەر",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const navMain = [
+  {
+    title: "داشبۆرد",
+    url: "/dashboard",
+    icon: (
+      <LayoutDashboardIcon
+      />
+    ),
   },
-  navMain: [
-    {
-      title: "داشبۆرد",
-      url: "/dashboard",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
-    },
-    {
-      title: "سەرەبڕین ",
-      url: "/dashboard/appointments",
-      icon: (
-        <CalendarIcon
-        />
-      ),
-    },
-    {
-      title: " بەشی فرۆشتن",
-      url: "/dashboard/seller",
-      icon: (
-        <ListIcon
-        />
-      ),
-    },
-    {
-      title: " كارمەندەکان",
-      url: "/dashboard/staff",
-      icon: (
-       <UsersIcon
-        />
-      ),
-    },
-    {
-      title: " قیستەکان",
-      url: "/dashboard/installments",
-      icon: (
-        <DollarSignIcon
-        />
-      ),
-    },
-    {
-      title: "خەرجییەکان",
-      url: "/dashboard/expenses",
-      icon: (
-        <TrendingDownIcon
-        />
-      ),
-    },
-    {
-      title: "ڕاپۆرتەکان",
-      url: "#",
-      icon: (
-        <BarChart3Icon
-        />
-      ),
-      children: [
-        {
-          title: " خەرجیەکان",
-          url: "/dashboard/reports?type=expenses",
-        },
-        {
-          title: " کارمەندەکان",
-          url: "/dashboard/reports?type=employees",
-        },
-        {
-          title: " قیسەکان",
-          url: "/dashboard/reports?type=installments",
-        },
-        {
-          title: " فرۆشتن",
-          url: "/dashboard/reports?type=sales",
-        },
-      ],
-    },
-    {
-      title: "ڕێکخستن",
-      url: "/dashboard/settings",
-      icon: (
-        <Cog
-        />
-      ),
-    },
-  ],
-}
+  {
+    title: "سەرەبڕین ",
+    url: "/dashboard/appointments",
+    icon: (
+      <CalendarIcon
+      />
+    ),
+  },
+  {
+    title: " بەشی فرۆشتن",
+    url: "/dashboard/seller",
+    icon: (
+      <ListIcon
+      />
+    ),
+  },
+  {
+    title: " كارمەندەکان",
+    url: "/dashboard/staff",
+    icon: (
+     <UsersIcon
+      />
+    ),
+  },
+  {
+    title: " قیستەکان",
+    url: "/dashboard/installments",
+    icon: (
+      <DollarSignIcon
+      />
+    ),
+  },
+  {
+    title: "خەرجییەکان",
+    url: "/dashboard/expenses",
+    icon: (
+      <TrendingDownIcon
+      />
+    ),
+  },
+  {
+    title: "ڕاپۆرتەکان",
+    url: "#",
+    icon: (
+      <BarChart3Icon
+      />
+    ),
+    children: [
+      {
+        title: " خەرجیەکان",
+        url: "/dashboard/reports?type=expenses",
+      },
+      {
+        title: " کارمەندەکان",
+        url: "/dashboard/reports?type=employees",
+      },
+      {
+        title: " قیسەکان",
+        url: "/dashboard/reports?type=installments",
+      },
+      {
+        title: " فرۆشتن",
+        url: "/dashboard/reports?type=sales",
+      },
+    ],
+  },
+  {
+    title: "ڕێکخستن",
+    url: "/dashboard/settings",
+    icon: (
+      <Cog
+      />
+    ),
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user, isOTPLogin } = useUser()
+
+  const userData = {
+    name: "بەکارهێنەر",
+    email: user?.email || "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+    isOTPLogin,
+  }
+
   return (
     <Sidebar collapsible="offcanvas" side="right" {...props}>
       <SidebarHeader className="py-4 px-2">
@@ -136,10 +139,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
   )

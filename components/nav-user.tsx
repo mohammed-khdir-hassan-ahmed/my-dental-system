@@ -26,6 +26,7 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    isOTPLogin?: boolean
   }
 }) {
   const router = useRouter()
@@ -52,27 +53,31 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <div className="flex items-center gap-3 px-2 py-4 border-t">
-          {/* User Profile Image */}
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/30 flex-shrink-0">
-            <Image
-              src="/images/my.jpg"
-              alt={user.name}
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
-            />
+        <div className="flex flex-col items-center gap-1 px-2 -pb-1 border-t pt-3">
+          {/* Email */}
+          <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[140px] leading-tight text-center">
+            {user.isOTPLogin ? '*****' : user.email}
+          </p>
+          
+          {/* User Profile Image and Logout Button */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/30 flex-shrink-0">
+              <Image
+                src="/images/my.jpg"
+                alt={user.name}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <button
+              onClick={() => setIsConfirmOpen(true)}
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/30 hover:border-destructive/50 transition-all duration-200 font-medium text-xs dark:bg-destructive/5 dark:hover:bg-destructive/10"
+            >
+              <span>چونەدەرەوە</span>
+              <LogOutIcon className="size-3" />
+            </button>
           </div>
-          
-          {/* Logout Button */}
-          <button
-            onClick={() => setIsConfirmOpen(true)}
-            className="flex items-center justify-center gap-2 flex-1 px-4 py-1 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/30 hover:border-destructive/50 transition-all duration-200 font-medium text-sm dark:bg-destructive/5 dark:hover:bg-destructive/10"
-          >
-          
-            <span>چونەدەرەووە</span>
-              <LogOutIcon className="size-4" />
-          </button>
 
           <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
             <DialogContent dir="rtl" className="max-w-md">
