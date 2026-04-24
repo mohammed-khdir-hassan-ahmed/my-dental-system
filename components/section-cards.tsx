@@ -86,7 +86,8 @@ export const SectionCards = memo(function SectionCards() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ku-IQ', { style: 'currency', currency: 'IQD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
+    const formatted = new Intl.NumberFormat('ku-IQ', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
+    return `${formatted} دینار`
   }
 
   const formatCompact = (amount: number | undefined) => {
