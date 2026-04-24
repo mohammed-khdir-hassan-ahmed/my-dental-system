@@ -103,123 +103,135 @@ export const SectionCards = memo(function SectionCards() {
   return (
     <div className="grid grid-cols-1 gap-4 px-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 lg:px-6">
       {/* Revenue Card */}
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white hover:scale-[1.02] transition-transform duration-300">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <DollarSignIcon className="size-6" />
-          </div>
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/20 backdrop-blur-sm ${stats.revenueTrend >= 0 ? '' : ''}`}>
-            {stats.revenueTrend >= 0 ? <TrendingUpIcon className="size-3.5" /> : <TrendingDownIcon className="size-3.5" />}
-            {stats.revenueTrend >= 0 ? '+' : ''}{stats.revenueTrend.toFixed(1)}%
-          </div>
-        </div>
-        <p className="text-sm font-medium text-white/80 mb-1">کۆی داهات</p>
-        <h3 className="text-2xl font-bold mb-4">{formatCurrency(stats.totalRevenue)}</h3>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">دانیشتەکان</span>
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300 " />
+        <div className="relative bg-emerald-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-emerald-200 dark:hover:border-slate-600">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <DollarSignIcon className="size-6 text-white" />
             </div>
-            <span className="text-sm font-semibold">{formatCompact(stats.appointmentsRevenue)}</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <ShoppingCartIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">فرۆشتن</span>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 ${stats.revenueTrend >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {stats.revenueTrend >= 0 ? <TrendingUpIcon className="size-3.5" /> : <TrendingDownIcon className="size-3.5" />}
+              {stats.revenueTrend >= 0 ? '+' : ''}{stats.revenueTrend.toFixed(1)}%
             </div>
-            <span className="text-sm font-semibold">{formatCompact(stats.salesRevenue)}</span>
+          </div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی داهات</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{formatCurrency(stats.totalRevenue)}</h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">دانیشتەکان</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatCompact(stats.appointmentsRevenue)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <ShoppingCartIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">فرۆشتن</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatCompact(stats.salesRevenue)}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Appointments Card */}
-      <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white hover:scale-[1.02] transition-transform duration-300">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <CalendarIcon className="size-6" />
-          </div>
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/20 backdrop-blur-sm ${stats.appointmentTrend >= 0 ? '' : ''}`}>
-            {stats.appointmentTrend >= 0 ? <TrendingUpIcon className="size-3.5" /> : <TrendingDownIcon className="size-3.5" />}
-            {stats.appointmentTrend >= 0 ? '+' : ''}{stats.appointmentTrend.toFixed(1)}%
-          </div>
-        </div>
-        <p className="text-sm font-medium text-white/80 mb-1">کۆی موچەی کارمەندەکان</p>
-        <h3 className="text-2xl font-bold mb-4">{formatCurrency(stats.totalSalaries)}</h3>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <UsersIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">کارمەند</span>
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition duration-300 rounded-3xl" />
+        <div className="relative bg-blue-50 dark:bg-slate-900 rounded-3xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <CalendarIcon className="size-6 text-white" />
             </div>
-            <span className="text-sm font-semibold">{stats.activeStaff}</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">دانیشتەکان</span>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 dark:bg-blue-900/30 ${stats.appointmentTrend >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {stats.appointmentTrend >= 0 ? <TrendingUpIcon className="size-3.5" /> : <TrendingDownIcon className="size-3.5" />}
+              {stats.appointmentTrend >= 0 ? '+' : ''}{stats.appointmentTrend.toFixed(1)}%
             </div>
-            <span className="text-sm font-semibold">{stats.appointmentsCount}</span>
+          </div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی موچەی کارمەندەکان</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{formatCurrency(stats.totalSalaries)}</h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <UsersIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{stats.activeStaff}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">دانیشتەکان</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{stats.appointmentsCount}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Expenses Card */}
-      <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-5 text-white hover:scale-[1.02] transition-transform duration-300">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <DollarSignIcon className="size-6" />
-          </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/20 backdrop-blur-sm">
-            داهات
-          </div>
-        </div>
-        <p className="text-sm font-medium text-white/80 mb-1">کۆی داهاتی فرۆشتن</p>
-        <h3 className="text-2xl font-bold mb-4">{formatCurrency(stats.salesRevenue)}</h3>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">نەخۆشەکان</span>
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-pink-500 opacity-0 group-hover:opacity-100 transition duration-300 rounded-3xl" />
+        <div className="relative bg-rose-50 dark:bg-slate-900 rounded-3xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-rose-200 dark:hover:border-slate-600">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <DollarSignIcon className="size-6 text-white" />
             </div>
-            <span className="text-sm font-semibold">{stats.appointmentsCount}</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <ShoppingCartIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">فرۆشتن</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+              داهات
             </div>
-            <span className="text-sm font-semibold">{formatCompact(stats.salesRevenue)}</span>
+          </div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی داهاتی فرۆشتن</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{formatCurrency(stats.salesRevenue)}</h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">نەخۆشەکان</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{stats.appointmentsCount}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <ShoppingCartIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">فرۆشتن</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatCompact(stats.salesRevenue)}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Installments Card */}
-      <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white hover:scale-[1.02] transition-transform duration-300">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <CreditCardIcon className="size-6" />
-          </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/20 backdrop-blur-sm">
-            چاوەڕوان
-          </div>
-        </div>
-        <p className="text-sm font-medium text-white/80 mb-1">قەرزی مانگانە</p>
-        <h3 className="text-2xl font-bold mb-4">{formatCurrency(stats.pendingInstallmentsAmount)}</h3>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">قیستی مانگانە</span>
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-100 transition duration-300 rounded-3xl" />
+        <div className="relative bg-amber-50 dark:bg-slate-900 rounded-3xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-amber-200 dark:hover:border-slate-600">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <CreditCardIcon className="size-6 text-white" />
             </div>
-            <span className="text-sm font-semibold">{formatCompact(stats.monthlyInstallmentAmount)}</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <UsersIcon className="size-3.5 text-white/80" />
-              <span className="text-xs text-white/80">نەخۆشانی قیست</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+              چاوەڕوان
             </div>
-            <span className="text-sm font-semibold">{stats.patientsWithInstallments || 0}</span>
+          </div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">قەرزی مانگانە</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{formatCurrency(stats.pendingInstallmentsAmount)}</h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <DollarSignIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">قیستی مانگانە</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatCompact(stats.monthlyInstallmentAmount)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <UsersIcon className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">نەخۆشانی قیست</span>
+              </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{stats.patientsWithInstallments || 0}</span>
+            </div>
           </div>
         </div>
       </div>
