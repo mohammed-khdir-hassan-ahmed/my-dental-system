@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card"
 import { TrendingUpIcon, TrendingDownIcon, DollarSignIcon, CalendarIcon, UsersIcon, CreditCardIcon, ShoppingCartIcon, ReceiptIcon, ArrowUpRightIcon } from "lucide-react"
 import { useDashboardFilter } from "@/contexts/dashboard-filter-context"
-import { mobileStatsGrid, mobileInset } from "@/components/dashboard-page-shell"
+import { dashboardStatsGrid, mobileInset } from "@/components/dashboard-page-shell"
 
 interface DashboardStats {
   totalRevenue: number
@@ -87,7 +87,7 @@ export const SectionCards = memo(function SectionCards() {
 
   if (loading || !stats) {
     return (
-      <div className={`${mobileStatsGrid} ${mobileInset}`}>
+      <div className={`${dashboardStatsGrid} ${mobileInset}`}>
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="h-44 rounded-xl sm:rounded-2xl bg-muted animate-pulse" />
         ))}
@@ -112,7 +112,7 @@ export const SectionCards = memo(function SectionCards() {
   }
 
   return (
-    <div className={`${mobileStatsGrid} ${mobileInset}`}>
+    <div className={`${dashboardStatsGrid} ${mobileInset}`}>
       {/* Revenue Card */}
       <div className="relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300 " />

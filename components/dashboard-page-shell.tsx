@@ -27,6 +27,10 @@ export const mobileInset = 'px-3 sm:px-0';
 export const mobileStatsGrid =
   'grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4';
 
+/** Four stat cards on the main dashboard home page */
+export const dashboardStatsGrid =
+  'grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4';
+
 export const mobileTableShell =
   'w-full border-y md:border md:rounded-xl border-border/90 overflow-hidden bg-card';
 
