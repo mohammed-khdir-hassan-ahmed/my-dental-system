@@ -18,6 +18,7 @@ import {
 } from "chart.js"
 import { Line, Bar, Doughnut, Radar } from "react-chartjs-2"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { mobileInset } from "@/components/dashboard-page-shell"
 import { useDashboardFilter } from "@/contexts/dashboard-filter-context"
 
 ChartJS.register(
@@ -347,7 +348,7 @@ export const ChartJSDashboard = memo(function ChartJSDashboard() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 ${mobileInset}`}>
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="border-0 bg-white dark:bg-slate-900">
             <CardHeader>
@@ -365,8 +366,8 @@ export const ChartJSDashboard = memo(function ChartJSDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className={`space-y-4 sm:space-y-6 ${mobileInset}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Doughnut Chart - Treatment Breakdown */}
         <Card className="border-0 bg-white dark:bg-slate-900 shadow-lg">
           <CardHeader>

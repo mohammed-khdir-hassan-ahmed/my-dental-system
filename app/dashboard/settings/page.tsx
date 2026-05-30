@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { UserIcon, MailIcon, LockIcon, KeyIcon, CheckCircleIcon, XCircleIcon } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
 import { notifySettingsUpdated, notifyActionError } from "@/lib/notify"
+import { DashboardPageShell, mobileInset, mobileDialogContent } from "@/components/dashboard-page-shell"
 
 export default function SettingsPage() {
   const { user, refreshUser } = useUser()
@@ -216,12 +217,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <DashboardPageShell className="space-y-6">
       
 
       {/* Profile Card */}
       {!user?.isOTPLogin && (
-        <Card className="border-2 border-slate-200/50 dark:border-slate-700/50  bg-white dark:bg-slate-900 overflow-hidden rounded-3xl">
+        <Card className={`border-2 border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden rounded-3xl ${mobileInset}`}>
           <CardHeader>
             <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
               <UserIcon className="size-5 text-[#3dc1d3]" />
@@ -247,7 +248,7 @@ export default function SettingsPage() {
 
       {/* Email Update Card */}
       {!user?.isOTPLogin && (
-        <Card className="border-2 border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden rounded-3xl">
+        <Card className={`border-2 border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden rounded-3xl ${mobileInset}`}>
           <CardHeader>
             <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
               <MailIcon className="size-5 text-[#3dc1d3]" />
@@ -311,7 +312,7 @@ export default function SettingsPage() {
 
       {/* Password Update Card */}
       {!user?.isOTPLogin && (
-        <Card className="border-2 border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden rounded-3xl">
+        <Card className={`border-2 border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden rounded-3xl ${mobileInset}`}>
           <CardHeader>
             <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
               <LockIcon className="size-5 text-[#3dc1d3]" />
@@ -389,7 +390,7 @@ export default function SettingsPage() {
 
       {/* OTP Update Card */}
       {user?.isOTPLogin && (
-        <Card className="border-2 border-slate-200/50 dark:border-slate-700/50 shadow-xl bg-white dark:bg-slate-900 overflow-hidden rounded-3xl">
+        <Card className={`border-2 border-slate-200/50 dark:border-slate-700/50 shadow-xl bg-white dark:bg-slate-900 overflow-hidden rounded-3xl ${mobileInset}`}>
           <CardHeader>
             <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
               <KeyIcon className="size-5 text-[#3dc1d3]" />
@@ -477,7 +478,7 @@ export default function SettingsPage() {
 
       {/* Email Success Modal */}
       <Dialog open={showEmailSuccessModal} onOpenChange={setShowEmailSuccessModal}>
-        <DialogContent dir="rtl" className="max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="size-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
@@ -494,7 +495,7 @@ export default function SettingsPage() {
 
       {/* Password Success Modal */}
       <Dialog open={showPasswordSuccessModal} onOpenChange={setShowPasswordSuccessModal}>
-        <DialogContent dir="rtl" className="max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="size-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
@@ -511,7 +512,7 @@ export default function SettingsPage() {
 
       {/* OTP Success Modal */}
       <Dialog open={showOTPSuccessModal} onOpenChange={setShowOTPSuccessModal}>
-        <DialogContent dir="rtl" className="max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="size-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
@@ -525,6 +526,6 @@ export default function SettingsPage() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageShell>
   )
 }

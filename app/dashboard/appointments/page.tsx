@@ -7,7 +7,6 @@ import {
   notifyPatientDeleted,
   notifyActionError,
 } from '@/lib/notify';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,9 +31,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Search, Trash2, Pencil, User, Calendar, TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Trash2, Pencil, User, Calendar, TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/pagination';
+import {
+  DashboardPageShell,
+  mobileStatsGrid,
+  mobileInset,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContent,
+  mobileSelectTrigger,
+  mobileBtn,
+} from '@/components/dashboard-page-shell';
+import { MobileListToolbar, MobileCustomDateRange } from '@/components/mobile-list-toolbar';
 
 interface Appointment {
   id: number;
@@ -345,40 +359,38 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="space-y-8">
-    
-
+    <DashboardPageShell>
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-start gap-3">
+        <div className={`${mobileInset} rounded-lg border border-destructive/50 bg-destructive/10 p-3 sm:p-4 text-destructive flex items-start gap-3`}>
           <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-          <span>{error}</span>
+          <span className="text-sm sm:text-base">{error}</span>
         </div>
       )}
 
       {/* Treatment Statistics Summary - Card Grid */}
       {(treatmentStats.length > 0 || totalMoney > 0) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className={`${mobileStatsGrid} ${mobileInset}`}>
           {/* Total Money Card */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-            <div className="relative bg-emerald-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-emerald-200 dark:hover:border-slate-600">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <DollarSign className="size-6 text-white" />
+            <div className="relative bg-emerald-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-emerald-200 dark:hover:border-slate-600 h-full">
+              <div className="flex items-start justify-between mb-2 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="size-4 sm:size-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                   داهات
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">داهاتی ئەمڕۆ</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{totalMoney.toLocaleString('en-US')} هەزار</h3>
+              <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">داهاتی ئەمڕۆ</p>
+              <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{totalMoney.toLocaleString('en-US')} هەزار</h3>
               <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="size-3.5 text-slate-500 dark:text-slate-400" />
-                    <span className="text-xs text-slate-600 dark:text-slate-400">دانیشتەکان</span>
+                <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <Calendar className="size-3 sm:size-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+                    <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 truncate">دانیشتەکان</span>
                   </div>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white">{appointments.length}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{appointments.length}</span>
                 </div>
               </div>
             </div>
@@ -417,26 +429,26 @@ export default function AppointmentsPage() {
             };
 
             return (
-              <div key={stat.treatmentType} className="relative group">
+              <div key={stat.treatmentType} className="relative group h-full">
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradientColors[stat.treatmentType] || 'from-gray-500 to-slate-500'} opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300`} />
-                <div className={`relative ${bgColors[stat.treatmentType] || 'bg-gray-50 dark:bg-slate-900'} rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent ${hoverBorder[stat.treatmentType] || ''} dark:hover:border-slate-600`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 bg-gradient-to-r ${gradientColors[stat.treatmentType] || 'from-gray-500 to-slate-500'} rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <User className="size-6 text-white" />
+                <div className={`relative h-full ${bgColors[stat.treatmentType] || 'bg-gray-50 dark:bg-slate-900'} rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent ${hoverBorder[stat.treatmentType] || ''} dark:hover:border-slate-600`}>
+                  <div className="flex items-start justify-between mb-2 sm:mb-4">
+                    <div className={`p-2 sm:p-3 bg-gradient-to-r ${gradientColors[stat.treatmentType] || 'from-gray-500 to-slate-500'} rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <User className="size-4 sm:size-6 text-white" />
                     </div>
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${badgeColors[stat.treatmentType] || ''}`}>
+                    <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold ${badgeColors[stat.treatmentType] || ''}`}>
                       {stat.count}
                     </div>
                   </div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{stat.treatmentType}</p>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{stat.totalMoney.toLocaleString('en-US')} هەزار</h3>
+                  <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1 line-clamp-2 leading-tight">{stat.treatmentType}</p>
+                  <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{stat.totalMoney.toLocaleString('en-US')} هەزار</h3>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <div className="flex items-center gap-2">
-                        <User className="size-3.5 text-slate-500 dark:text-slate-400" />
-                        <span className="text-xs text-slate-600 dark:text-slate-400">دانیشتەکان</span>
+                    <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                        <User className="size-3 sm:size-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+                        <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 truncate">دانیشتەکان</span>
                       </div>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-white">{stat.count}</span>
+                      <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{stat.count}</span>
                     </div>
                   </div>
                 </div>
@@ -445,77 +457,68 @@ export default function AppointmentsPage() {
           })}
         </div>
       )}
-  <div className="flex flex-row items-center justify-between gap-3">
-        <div className="flex-1 relative">
-          <Search className="absolute opacity-60 border border-border/60  right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          <Input
-            type="text"
-            placeholder="گەڕان"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full opacity-60 rounded-lg border-border/60 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-10 h-10"
-          />
-        </div>
-        <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
-          <SelectTrigger className="w-fit h-10">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">ئەم مانگە</SelectItem>
-            <SelectItem value="week">ئەم حەفتەیە</SelectItem>
-            <SelectItem value="today">ئەمڕۆ</SelectItem>
-            <SelectItem value="all">سەرجەم</SelectItem>
-            <SelectItem value="custom">بەرواری تایبەت</SelectItem>
-          </SelectContent>
-        </Select>
-        {timePeriod === 'custom' && (
-          <div className="flex gap-2">
-            <Input
-              type="date"
-              value={customStartDate}
-              onChange={(e) => setCustomStartDate(e.target.value)}
-              className="h-10"
+      <MobileListToolbar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="گەڕان..."
+        filterSlot={
+          <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
+            <SelectTrigger className={`flex-1 min-w-[120px] sm:flex-none sm:w-auto ${mobileSelectTrigger}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="month">ئەم مانگە</SelectItem>
+              <SelectItem value="week">ئەم حەفتەیە</SelectItem>
+              <SelectItem value="today">ئەمڕۆ</SelectItem>
+              <SelectItem value="all">سەرجەم</SelectItem>
+              <SelectItem value="custom">بەرواری تایبەت</SelectItem>
+            </SelectContent>
+          </Select>
+        }
+        customDateSlot={
+          timePeriod === 'custom' ? (
+            <MobileCustomDateRange
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onStartChange={setCustomStartDate}
+              onEndChange={setCustomEndDate}
             />
-            <Input
-              type="date"
-              value={customEndDate}
-              onChange={(e) => setCustomEndDate(e.target.value)}
-              className="h-10"
-            />
-          </div>
-        )}
-        <Button 
-          onClick={() => setOpenDialog(true)}
-          className="bg-primary hover:shadow-lg hover:shadow-primary/30 gap-2 text-white font-semibold px-4 py-2 whitespace-nowrap"
-        >
-        
-          زیادکردنی نەخۆش
-            <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-      <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-      
-        <Table>
+          ) : null
+        }
+        actionSlot={
+          <Button
+            onClick={() => setOpenDialog(true)}
+            className={`flex-1 sm:flex-none bg-primary hover:shadow-lg hover:shadow-primary/30 gap-1.5 text-white font-semibold px-3 sm:px-4 whitespace-nowrap ${mobileBtn}`}
+          >
+            زیادکردنی نەخۆش
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </Button>
+        }
+      />
+
+      {/* Table - full width edge to edge on mobile */}
+      <div className={mobileTableShell}>
+        <div className={mobileTableScroll}>
+        <Table className={mobileTableMin}>
           <TableHeader className="bg-primary/5 border-b border-border/40">
             <TableRow className="hover:bg-primary/2 transition-colors">
-           
-              <TableHead className="text-right text-primary font-bold">ناوی نەخۆش</TableHead>
-              <TableHead className="text-right text-primary font-bold">ڕەگەز</TableHead>
-              <TableHead className="text-right text-primary font-bold">تەلەفۆن</TableHead>
-              <TableHead className="text-right text-primary font-bold">تەمەن</TableHead>
-              <TableHead className="text-right text-primary font-bold">جۆری چارەسەری</TableHead>
-              <TableHead className="text-right text-primary font-bold">بەرواری چاوپێکەوتن</TableHead>
-              <TableHead className="text-right text-primary font-bold">بڕی پارە</TableHead>
-              <TableHead className="text-center text-primary font-bold">کردار</TableHead>
+              <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
+              <TableHead className={mobileTh}>ڕەگەز</TableHead>
+              <TableHead className={mobileTh}>تەلەفۆن</TableHead>
+              <TableHead className={mobileTh}>تەمەن</TableHead>
+              <TableHead className={mobileTh}>جۆری چارەسەری</TableHead>
+              <TableHead className={mobileTh}>بەروار</TableHead>
+              <TableHead className={mobileTh}>بڕی پارە</TableHead>
+              <TableHead className={`${mobileTh} text-center`}>کردار</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedAppointments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground hover:bg-transparent">
+                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground hover:bg-transparent">
                   <div className="flex flex-col items-center gap-2">
                     <User className="w-12 h-12 opacity-30 mx-auto" />
-                    <span className="text-lg">{searchTerm ? 'هیچ نەخۆشێک نەدۆزرایەوە !' : 'هیچ چاوپێکەوتن نیە'}</span>
+                    <span className="text-sm sm:text-lg">{searchTerm ? 'هیچ نەخۆشێک نەدۆزرایەوە !' : 'هیچ چاوپێکەوتن نیە'}</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -529,51 +532,48 @@ export default function AppointmentsPage() {
                       : 'bg-primary/2 dark:bg-slate-900/30'
                   } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                 >
-            
-                  <TableCell className="text-xs font-semibold text-foreground">{appointment.name}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{appointment.gender}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{appointment.phone}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{appointment.age}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
-                    {appointment.treatmentType}
-                  </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTdPrimary}>{appointment.name}</TableCell>
+                  <TableCell className={mobileTd}>{appointment.gender}</TableCell>
+                  <TableCell className={mobileTd}>{appointment.phone}</TableCell>
+                  <TableCell className={mobileTd}>{appointment.age}</TableCell>
+                  <TableCell className={`${mobileTd} max-w-[90px] sm:max-w-none truncate`}>{appointment.treatmentType}</TableCell>
+                  <TableCell className={mobileTd}>
                     {new Date(appointment.appointmentDate).toLocaleDateString('ku-IQ', {
                       year: 'numeric',
                       month: '2-digit',
                       day: '2-digit'
                     })}
                   </TableCell>
-                  <TableCell className="text-foreground/70">
+                  <TableCell className={`${mobileTd} text-foreground/70`}>
                     {appointment.money ? (
-                      <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                      <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-green-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300">
                         {`${parseFloat(String(appointment.money)).toLocaleString('en-US')} هەزار`}
                       </span>
                     ) : (
-                      <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-gray-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                         -
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1">
+                  <TableCell className={`${mobileTd} text-center`}>
+                    <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditAppointment(appointment)}
-                        className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900"
+                        className="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900"
                         title="دەستکاریکردن"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setDeleteConfirm(appointment.id)}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900"
+                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900"
                         title="سڕینەوە"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -582,10 +582,11 @@ export default function AppointmentsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="border-t border-border/40 bg-primary/2">
+      <div className="w-full border-t md:border border-border/40 bg-card md:bg-primary/2 md:rounded-xl px-2 sm:px-0">
         <Pagination
           currentPage={paginationPage}
           totalPages={totalPages}
@@ -613,20 +614,22 @@ export default function AppointmentsPage() {
           });
         }
       }}>
-        <DialogContent dir="rtl" className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className='text-center'>{editingAppointment ? 'دەستکاریکردنی نەخۆش' : 'زیادکردنی نەخۆش'}</DialogTitle>
-            <DialogDescription className='text-center'>
-              {editingAppointment ? 'زانیاریەکانی نەخۆشەکە دەستکاری بکە' : 'زانیاریەکانی نەخۆشە نوێەکە بنووسە'}
+        <DialogContent dir="rtl" className={mobileDialogContent}>
+          <DialogHeader className="gap-0.5 sm:gap-2 pb-0">
+            <DialogTitle className="text-center text-sm sm:text-base font-bold">
+              {editingAppointment ? 'دەستکاریکردنی نەخۆش' : 'زیادکردنی نەخۆش'}
+            </DialogTitle>
+            <DialogDescription className="text-center text-[11px] sm:text-sm leading-tight">
+              {editingAppointment ? 'زانیاریەکان دەستکاری بکە' : 'زانیاریەکانی نەخۆش بنووسە'}
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleAddAppointment} className="space-y-4">
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ناو</label>
+          <form onSubmit={handleAddAppointment} className="space-y-2.5 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ناو</label>
                 <Input
-                  className="sm:col-span-2"
+                  className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -635,51 +638,52 @@ export default function AppointmentsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ڕەگەز</label>
-                <div className="sm:col-span-2">
-                  <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="ڕەگەز" />
-                    </SelectTrigger>
-                    <SelectContent dir="rtl">
-                      <SelectItem value="نێر">نێر</SelectItem>
-                      <SelectItem value="مێ">مێ</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3">
+                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ڕەگەز</label>
+                  <div className="sm:col-span-2">
+                    <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
+                      <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                        <SelectValue placeholder="ڕەگەز" />
+                      </SelectTrigger>
+                      <SelectContent dir="rtl">
+                        <SelectItem value="نێر">نێر</SelectItem>
+                        <SelectItem value="مێ">مێ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەمەن</label>
+                  <Input
+                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    name="age"
+                    type="number"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                    placeholder="تەمەن"
+                    required
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ژمارەی تەلەفۆن</label>
-              <Input
-                className="sm:col-span-2"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="07701234567"
-                required
-              />
+              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەلەفۆن</label>
+                <Input
+                  className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="07701234567"
+                  required
+                />
               </div>
 
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەمەن</label>
-              <Input
-                className="sm:col-span-2"
-                name="age"
-                type="number"
-                value={formData.age}
-                onChange={handleInputChange}
-                placeholder="تەمەن"
-                required
-              />
-              </div>
-
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">جۆری چارەسەری</label>
+              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">چارەسەر</label>
                 <div className="sm:col-span-2">
                   <Select value={formData.treatmentType} onValueChange={(value) => handleSelectChange('treatmentType', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
                       <SelectValue placeholder="جۆری چارەسەر" />
                     </SelectTrigger>
                     <SelectContent dir="rtl">
@@ -693,49 +697,51 @@ export default function AppointmentsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بەرواری چاوپێکەوتن</label>
-              <Input
-                className="sm:col-span-2"
-                name="appointmentDate"
-                type="date"
-                value={formData.appointmentDate}
-                onChange={handleInputChange}
-                required
-              />
-              </div>
-
-              <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بڕی پارە</label>
-              <Input
-                className="sm:col-span-2"
-                name="money"
-                type="text"
-                inputMode="numeric"
-                value={formData.money ? Number(formData.money).toLocaleString('en-US') : ''}
-                onChange={(e) => {
-                  const rawValue = e.target.value.replace(/,/g, '');
-                  if (rawValue === '' || /^\d*\.?\d*$/.test(rawValue)) {
-                    handleInputChange({ target: { name: 'money', value: rawValue } } as React.ChangeEvent<HTMLInputElement>);
-                  }
-                }}
-                placeholder="0"
-              />
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3">
+                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بەروار</label>
+                  <Input
+                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    name="appointmentDate"
+                    type="date"
+                    value={formData.appointmentDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">پارە</label>
+                  <Input
+                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    name="money"
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.money ? Number(formData.money).toLocaleString('en-US') : ''}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, '');
+                      if (rawValue === '' || /^\d*\.?\d*$/.test(rawValue)) {
+                        handleInputChange({ target: { name: 'money', value: rawValue } } as React.ChangeEvent<HTMLInputElement>);
+                      }
+                    }}
+                    placeholder="0"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex gap-2 pt-2 sm:pt-4">
               <Button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 bg-primary hover:shadow-lg hover:shadow-primary/30 text-white font-semibold"
+                className="flex-1 h-9 sm:h-10 text-xs sm:text-sm bg-primary hover:shadow-lg hover:shadow-primary/30 text-white font-semibold"
               >
-                {submitting ? 'چونەژوورەوە...' : 'زیادکردن'}
+                {submitting ? 'چاوەڕوانبە...' : editingAppointment ? 'نوێکردنەوە' : 'زیادکردن'}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpenDialog(false)}
+                className="h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4"
               >
                 داخستن
               </Button>
@@ -799,6 +805,6 @@ export default function AppointmentsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageShell>
   );
 }

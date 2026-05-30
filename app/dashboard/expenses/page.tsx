@@ -36,9 +36,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle, Loader2, Pencil, Plus, Search, Trash2, Wallet } from 'lucide-react';
+import { AlertCircle, Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/pagination';
+import {
+  DashboardPageShell,
+  mobileStatsGrid,
+  mobileInset,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContent,
+  mobileSelectTrigger,
+  mobileBtn,
+} from '@/components/dashboard-page-shell';
+import { MobileListToolbar, MobileCustomDateRange } from '@/components/mobile-list-toolbar';
 import {
   expenseCategories,
   paymentMethods,
@@ -632,30 +647,30 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="space-y-6 p-6" dir="rtl">
+    <DashboardPageShell>
       {error && (
-        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+        <div className={`flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive ${mobileInset}`}>
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className={`${mobileStatsGrid} ${mobileInset}`}>
         {/* Monthly Total Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-red-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Wallet className="size-6 text-white" />
+          <div className="relative bg-red-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
                 ئەم مانگە
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی خەرجییەکانی ئەم مانگە</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{formatAmount(monthlyTotal)}</h3>
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی خەرجییەکانی ئەم مانگە</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{formatAmount(monthlyTotal)}</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
@@ -671,17 +686,17 @@ export default function ExpensesPage() {
         {/* Total Expenses Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-amber-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-orange-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-orange-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <AlertCircle className="size-6 text-white" />
+          <div className="relative bg-orange-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-orange-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <AlertCircle className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
                 کۆی
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{getMonthLabel()}</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{getMonthLabel()}</h3>
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{getMonthLabel()}</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{getMonthLabel()}</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
@@ -695,65 +710,57 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      <div className="flex flex-row items-center justify-between gap-3">
-        <div className="flex-1 relative">
-          <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="گەڕان بە ناونیشانی خەرجی"
-            className="pr-10 h-10"
-          />
-        </div>
-        <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
-          <SelectTrigger className="w-fit h-10">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">ئەم مانگە</SelectItem>
-            <SelectItem value="week">ئەم حەفتەیە</SelectItem>
-            <SelectItem value="today">ئەمڕۆ</SelectItem>
-            <SelectItem value="all">سەرجەم</SelectItem>
-            <SelectItem value="custom">بەرواری تایبەت</SelectItem>
-          </SelectContent>
-        </Select>
-        {timePeriod === 'custom' && (
-          <div className="flex gap-2">
-            <Input
-              type="date"
-              value={customStartDate}
-              onChange={(e) => setCustomStartDate(e.target.value)}
-              className="h-10"
+      <MobileListToolbar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="گەڕان بە ناونیشانی خەرجی"
+        filterSlot={
+          <Select value={timePeriod} onValueChange={(value: 'month' | 'week' | 'today' | 'all' | 'custom') => setTimePeriod(value)}>
+            <SelectTrigger className={`flex-1 min-w-[120px] sm:flex-none sm:w-auto ${mobileSelectTrigger}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="month">ئەم مانگە</SelectItem>
+              <SelectItem value="week">ئەم حەفتەیە</SelectItem>
+              <SelectItem value="today">ئەمڕۆ</SelectItem>
+              <SelectItem value="all">سەرجەم</SelectItem>
+              <SelectItem value="custom">بەرواری تایبەت</SelectItem>
+            </SelectContent>
+          </Select>
+        }
+        customDateSlot={
+          timePeriod === 'custom' ? (
+            <MobileCustomDateRange
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onStartChange={setCustomStartDate}
+              onEndChange={setCustomEndDate}
             />
-            <Input
-              type="date"
-              value={customEndDate}
-              onChange={(e) => setCustomEndDate(e.target.value)}
-              className="h-10"
-            />
-          </div>
-        )}
-        <Button
-          onClick={() => setAddOpen(true)}
-          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 active:shadow-inner px-4 py-2 whitespace-nowrap transition-all duration-150"
-        >
-          <Plus className="h-4 w-4" />
-          خەرجی
-        </Button>
-      </div>
+          ) : null
+        }
+        actionSlot={
+          <Button
+            onClick={() => setAddOpen(true)}
+            className={`flex-1 sm:flex-none gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 active:shadow-inner px-3 sm:px-4 whitespace-nowrap transition-all duration-150 ${mobileBtn}`}
+          >
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            خەرجی
+          </Button>
+        }
+      />
 
-      <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-        <div className="overflow-x-auto">
-          <Table>
+      <div className={mobileTableShell}>
+        <div className={mobileTableScroll}>
+          <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">ناونیشانی خەرجی</TableHead>
-                <TableHead className="text-right text-primary font-bold">پۆلێن</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی پارە</TableHead>
-                <TableHead className="text-right text-primary font-bold">ڕێگەی پارەدان</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەروار</TableHead>
-                <TableHead className="text-right text-primary font-bold">تێبینی</TableHead>
-                <TableHead className="text-center text-primary font-bold">کرداری</TableHead>
+                <TableHead className={mobileTh}>ناونیشانی خەرجی</TableHead>
+                <TableHead className={mobileTh}>پۆلێن</TableHead>
+                <TableHead className={mobileTh}>بڕی پارە</TableHead>
+                <TableHead className={mobileTh}>ڕێگەی پارەدان</TableHead>
+                <TableHead className={mobileTh}>بەروار</TableHead>
+                <TableHead className={mobileTh}>تێبینی</TableHead>
+                <TableHead className={`${mobileTh} text-center`}>کرداری</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -773,22 +780,22 @@ export default function ExpensesPage() {
                         : 'bg-primary/2 dark:bg-slate-900/30'
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{expense.title}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{expense.category}</TableCell>
-                    <TableCell className="text-foreground/70">
+                    <TableCell className={mobileTdPrimary}>{expense.title}</TableCell>
+                    <TableCell className={mobileTd}>{expense.category}</TableCell>
+                    <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/40 dark:text-red-300">
                         {formatAmount(expense.amount)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{expense.paymentMethod}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">
+                    <TableCell className={mobileTd}>{expense.paymentMethod}</TableCell>
+                    <TableCell className={mobileTd}>
                       {new Date(expense.date).toLocaleDateString('ku-IQ', {
                         year: 'numeric',
                         month: '2-digit',
                         day: '2-digit',
                       })}
                     </TableCell>
-                    <TableCell className="max-w-65 truncate text-xs font-semibold text-foreground/80">
+                    <TableCell className={`${mobileTd} max-w-65 truncate`}>
                       {expense.notes || '-'}
                     </TableCell>
                     <TableCell className="text-center">
@@ -825,7 +832,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Pagination */}
-      <div className="border-t border-border/40 bg-primary/2">
+      <div className="w-full border-t md:border border-border/40 bg-card md:bg-primary/2 md:rounded-xl px-2 sm:px-0">
         <Pagination
           currentPage={paginationPage}
           totalPages={totalPages}
@@ -838,7 +845,7 @@ export default function ExpensesPage() {
       </div>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent dir="rtl" className="sm:max-w-lg">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <DialogTitle>زیادکردنی خەرجی نوێ</DialogTitle>
             <DialogDescription>زانیاریی خەرجیەکە بنووسە و تۆماری بکە.</DialogDescription>
@@ -855,7 +862,7 @@ export default function ExpensesPage() {
       </Dialog>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent dir="rtl" className="sm:max-w-lg">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <DialogTitle>دەستکاریکردنی خەرجی</DialogTitle>
             <DialogDescription>زانیارییەکان نوێ بکەرەوە و پاشان پاشەکەوتی بکە.</DialogDescription>
@@ -872,7 +879,7 @@ export default function ExpensesPage() {
       </Dialog>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent dir="rtl" className="sm:max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <DialogTitle className="text-destructive text-center">سڕینەوەی خەرجی</DialogTitle>
             <DialogDescription>
@@ -907,7 +914,7 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
 
-    </div>
+    </DashboardPageShell>
   );
 }
 

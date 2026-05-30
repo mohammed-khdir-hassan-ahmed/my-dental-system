@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -27,12 +26,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Trash2, Plus, User, Search, Pencil, Eye, FileText, Wallet, CalendarCheck } from 'lucide-react';
+import { Loader2, Trash2, Plus, User, Pencil, Eye, FileText, Wallet, CalendarCheck } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { useStaff, useMonthlyRecords, useAddStaff, useAddMonthlyRecord, useDeleteStaff, useUpdateStaff, useCloseMonth } from '@/hooks/useStaffQueries';
 import { notifyActionError, notifyMonthClosed } from '@/lib/notify';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/pagination';
+import {
+  DashboardPageShell,
+  mobileStatsGrid,
+  mobileInset,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContent,
+  mobileDialogContentWide,
+  mobileBtn,
+} from '@/components/dashboard-page-shell';
+import { MobileListToolbar } from '@/components/mobile-list-toolbar';
 
 
 interface FormData {
@@ -406,118 +420,25 @@ function StaffPageContent() {
   }
 
   return (
-    <div className="space-y-6 p-1.5" dir="rtl">
-      {/* Search Bar */}
-      <div className="flex flex-row items-center justify-between gap-2 ">
-        {/* Search Section */}
-        <div className="flex-1 relative min-w-0">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none shrink-0" />
-          <Input
-            placeholder="گەڕان"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border-border/90 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-10 h-10"
-          />
-        </div>
-
-        <div className="flex gap-1 flex-shrink-0">
-          <Button
-            onClick={() => setOpenCloseMonthDialog(true)}
-            className="bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-semibold px-2 sm:px-3 py-2 text-xs sm:text-sm transition-all duration-150"
-          >
-            <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>کۆتایی مانگ</span>
-          </Button>
-          <Button
-            onClick={() => setOpenAddAdvanceDialog(true)}
-            className="bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-bold px-2 sm:px-3 py-2 text-xs sm:text-sm transition-all duration-150"
-          >
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>پێشەکی</span>
-          </Button>
-          <Button
-            onClick={() => setOpenAddStaffDialog(true)}
-            className="bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-semibold px-2 sm:px-3 py-2 text-xs sm:text-sm transition-all duration-150"
-          >
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>کارمەند</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Month/Year Filter */}
-      <div className="rounded-xl border border-border/70 bg-card p-3">
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="min-w-[130px]">
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">مانگ</label>
-            <Select value={String(selectedMonth)} onValueChange={(value) => setSelectedMonth(Number(value))}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent dir="rtl">
-                {MONTH_LABELS.map((monthLabel, index) => (
-                  <SelectItem key={monthLabel} value={String(index + 1)}>
-                    {monthLabel}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="min-w-[130px]">
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">ساڵ</label>
-            <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent dir="rtl">
-                {availableYears.map((year) => (
-                  <SelectItem key={year} value={String(year)}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9"
-            onClick={() => {
-              const prev = getPreviousMonthYear(selectedMonth, selectedYear);
-              setSelectedMonth(prev.month);
-              setSelectedYear(prev.year);
-              setAvailableYears((years) => Array.from(new Set([...years, prev.year])).sort((a, b) => b - a));
-            }}
-          >
-            مانگی پێشوو
-          </Button>
-
-          <div className="mr-auto text-xs text-muted-foreground">
-            نیشاندانی داتا: <span className="font-semibold text-foreground">{formatMonthYearLabel(selectedMonth, selectedYear)}</span>
-          </div>
-        </div>
-      </div>
-
+    <DashboardPageShell>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className={`${mobileStatsGrid} ${mobileInset}`}>
         {/* Staff Count Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <User className="size-6 text-white" />
+          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <User className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                 کارمەند
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">ژمارەی کارمەندەکان</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{staff.length}</h3>
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">ژمارەی کارمەندەکان</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{staff.length}</h3>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
                   <User className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
@@ -531,21 +452,21 @@ function StaffPageContent() {
         {/* Basic Salary Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-green-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-green-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <FileText className="size-6 text-white" />
+          <div className="relative bg-green-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-green-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FileText className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
                 مووچە
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی مووچەی بنەڕەتی</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی مووچەی بنەڕەتی</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
               {formatCurrency(staff.reduce((sum, s) => sum + parseFloat(s.basicSalary || '0'), 0))} IQD
             </h3>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
                   <FileText className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
@@ -559,21 +480,21 @@ function StaffPageContent() {
         {/* Remaining Salary Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Wallet className="size-6 text-white" />
+          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                 ماوە
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">بڕی موچەی ماوە</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">بڕی موچەی ماوە</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
               {formatCurrency(staff.reduce((sum, s) => sum + (parseFloat(s.basicSalary || '0') - calculateStaffTotals(s.id)), 0))} IQD
             </h3>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
                   <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
@@ -586,37 +507,124 @@ function StaffPageContent() {
 
       </div>
 
+      <div className={`flex flex-col gap-2.5 sm:gap-3 ${mobileInset}`}>
+        <div className="flex flex-wrap items-stretch gap-2 w-full">
+          <Button
+            onClick={() => setOpenCloseMonthDialog(true)}
+            className={`flex-1 sm:flex-none bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-semibold px-2 sm:px-3 text-xs sm:text-sm transition-all duration-150 ${mobileBtn}`}
+          >
+            <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>کۆتایی مانگ</span>
+          </Button>
+          <Button
+            onClick={() => setOpenAddAdvanceDialog(true)}
+            className={`flex-1 sm:flex-none bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-bold px-2 sm:px-3 text-xs sm:text-sm transition-all duration-150 ${mobileBtn}`}
+          >
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>پێشەکی</span>
+          </Button>
+          <Button
+            onClick={() => setOpenAddStaffDialog(true)}
+            className={`flex-1 sm:flex-none bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1 text-white font-semibold px-2 sm:px-3 text-xs sm:text-sm transition-all duration-150 ${mobileBtn}`}
+          >
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>کارمەند</span>
+          </Button>
+        </div>
+
+        {/* Month/Year Filter */}
+        <div className="rounded-xl border border-border/70 bg-card p-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[130px]">
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">مانگ</label>
+              <Select value={String(selectedMonth)} onValueChange={(value) => setSelectedMonth(Number(value))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  {MONTH_LABELS.map((monthLabel, index) => (
+                    <SelectItem key={monthLabel} value={String(index + 1)}>
+                      {monthLabel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="min-w-[130px]">
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">ساڵ</label>
+              <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9"
+              onClick={() => {
+                const prev = getPreviousMonthYear(selectedMonth, selectedYear);
+                setSelectedMonth(prev.month);
+                setSelectedYear(prev.year);
+                setAvailableYears((years) => Array.from(new Set([...years, prev.year])).sort((a, b) => b - a));
+              }}
+            >
+              مانگی پێشوو
+            </Button>
+
+            <div className="mr-auto text-xs text-muted-foreground">
+              نیشاندانی داتا: <span className="font-semibold text-foreground">{formatMonthYearLabel(selectedMonth, selectedYear)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <MobileListToolbar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="گەڕان"
+      />
+
       {/* Staff Table */}
-      <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-        <div className="overflow-x-auto">
-        <Table>
+      <div className={mobileTableShell}>
+        <div className={mobileTableScroll}>
+        <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   ناوی کارمەند
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   پلەی کارمەند
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   ژمارە تەلەفۆن
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   تەمەن
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   ناونیشان
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   مووچەی بنەڕەتی
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   کۆی پێشەکییەکان
                 </TableHead>
-                <TableHead className="text-right text-primary font-bold">
+                <TableHead className={mobileTh}>
                   بڕی ماوەی مووچە
                 </TableHead>
-                <TableHead className="text-center text-primary font-bold">
+                <TableHead className={`${mobileTh} text-center`}>
                   کردارەکان
                 </TableHead>
               </TableRow>
@@ -646,20 +654,17 @@ function StaffPageContent() {
                           : 'bg-primary/2 dark:bg-slate-900/30'
                       } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                     >
-                      <TableCell className="text-xs font-semibold text-foreground">
+                      <TableCell className={mobileTdPrimary}>
                         {s.fullName}
                       </TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{s.role}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
-
-                          {s.phonenumber}
-                        </div>
+                      <TableCell className={mobileTd}>{s.role}</TableCell>
+                      <TableCell className={mobileTd}>
+                        {s.phonenumber}
                       </TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">
+                      <TableCell className={mobileTd}>
                         {s.age ? `${s.age} ساڵ` : '-'}
                       </TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">
+                      <TableCell className={mobileTd}>
                         {s.address || '-'}
                       </TableCell>
                       <TableCell className="text-foreground/70">
@@ -693,15 +698,15 @@ function StaffPageContent() {
                           {formatCurrency(remainingSalary)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className={`${mobileTd} text-center`}>
                         <div className="flex items-center justify-center gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenEditStaff(s)}
-                            className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900"
+                            className="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -742,7 +747,7 @@ function StaffPageContent() {
 
       {/* Advance Reason Dialog */}
       <Dialog open={openAdvanceReasonDialog} onOpenChange={setOpenAdvanceReasonDialog}>
-        <DialogContent className="max-w-lg" dir="rtl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-center">هۆکاری پێشەکی</DialogTitle>
             <DialogDescription className="text-center">
@@ -784,7 +789,7 @@ function StaffPageContent() {
           if (!closeMonthMutation.isPending) setOpenCloseMonthDialog(open);
         }}
       >
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContent} dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-center">کۆتایی پێهێنان بە مانگەکە</DialogTitle>
             <DialogDescription className="text-center">
@@ -860,7 +865,7 @@ function StaffPageContent() {
           }
         }}
       >
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContent} dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-center">دڵنیابوونەوە</DialogTitle>
             <DialogDescription className="text-center">
@@ -895,7 +900,7 @@ function StaffPageContent() {
 
       {/* Add Staff Dialog */}
       <Dialog open={openAddStaffDialog} onOpenChange={setOpenAddStaffDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle className='text-center'>زیادکردنی کارمەند نوێ</DialogTitle>
           
@@ -1036,7 +1041,7 @@ function StaffPageContent() {
 
       {/* Edit Staff Dialog */}
       <Dialog open={openEditStaffDialog} onOpenChange={setOpenEditStaffDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle className='text-center'>دەستکاریکردنی زانیاری کارمەند</DialogTitle>
           </DialogHeader>
@@ -1166,7 +1171,7 @@ function StaffPageContent() {
 
       {/* Add Advance Dialog */}
       <Dialog open={openAddAdvanceDialog} onOpenChange={setOpenAddAdvanceDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle className='text-center'> وەرگرتنی پێشەکی </DialogTitle>
            
@@ -1262,7 +1267,7 @@ function StaffPageContent() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageShell>
   );
 }
 

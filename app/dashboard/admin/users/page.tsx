@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Loader2, Plus, Shield, Trash2, Pencil, Search, Users } from 'lucide-react'
+import { Loader2, Plus, Shield, Trash2, Pencil, Users } from 'lucide-react'
 import {
   notifyUserAdded,
   notifyUserUpdated,
@@ -41,6 +41,19 @@ import {
   type UserRole,
 } from '@/lib/permissions'
 import { usePermissions } from '@/hooks/usePermissions'
+import {
+  DashboardPageShell,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContent,
+  mobileDialogContentWide,
+  mobileBtn,
+} from '@/components/dashboard-page-shell'
+import { MobileListToolbar } from '@/components/mobile-list-toolbar'
 
 type AppUser = {
   id: number
@@ -211,36 +224,32 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6 p-1.5" dir="rtl">
-      <div className="flex flex-row items-center justify-between gap-2">
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 shrink-0 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="گەڕان بە ئیمەیڵ"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 w-full rounded-lg border-border/90 pr-10 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-          />
-        </div>
-        <Button
-          onClick={openCreate}
-          className="shrink-0 gap-1 bg-primary px-2 py-2 text-xs font-semibold text-white transition-all duration-150 hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner sm:px-3 sm:text-sm"
-        >
-          <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span>بەکارهێنەر</span>
-        </Button>
-      </div>
+    <DashboardPageShell>
+      <MobileListToolbar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="گەڕان بە ئیمەیڵ"
+        actionSlot={
+          <Button
+            onClick={openCreate}
+            className={`shrink-0 flex-1 sm:flex-none gap-1 bg-primary px-2 sm:px-3 text-xs font-semibold text-white transition-all duration-150 hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner sm:text-sm ${mobileBtn}`}
+          >
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>بەکارهێنەر</span>
+          </Button>
+        }
+      />
 
-      <div className="overflow-hidden rounded-xl border border-border/90 bg-card">
-        <div className="overflow-x-auto">
-          <Table>
+      <div className={mobileTableShell}>
+        <div className={mobileTableScroll}>
+          <Table className={mobileTableMin}>
             <TableHeader className="border-b border-border/40 bg-primary/5">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right font-bold text-primary">#</TableHead>
-                <TableHead className="text-right font-bold text-primary">ئیمەیڵ</TableHead>
-                <TableHead className="text-right font-bold text-primary">ڕۆڵ</TableHead>
-                <TableHead className="text-right font-bold text-primary">دەسەڵاتەکان</TableHead>
-                <TableHead className="text-center font-bold text-primary">کردارەکان</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>ئیمەیڵ</TableHead>
+                <TableHead className={mobileTh}>ڕۆڵ</TableHead>
+                <TableHead className={mobileTh}>دەسەڵاتەکان</TableHead>
+                <TableHead className={`${mobileTh} text-center`}>کردارەکان</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -271,8 +280,8 @@ export default function AdminUsersPage() {
                         : 'bg-primary/2 dark:bg-slate-900/30'
                     } hover:bg-primary/5 dark:hover:bg-primary/10`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{user.id}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground">{user.email}</TableCell>
+                    <TableCell className={mobileTd}>{user.id}</TableCell>
+                    <TableCell className={mobileTdPrimary}>{user.email}</TableCell>
                     <TableCell>
                       <span
                         className={`inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl px-2 py-0.5 text-xs font-semibold ${
@@ -284,7 +293,7 @@ export default function AdminUsersPage() {
                         {user.role === 'admin' ? 'ئەدمین' : 'بەکارهێنەر'}
                       </span>
                     </TableCell>
-                    <TableCell className="max-w-xs text-xs font-semibold text-foreground/80">
+                    <TableCell className={`${mobileTd} max-w-xs`}>
                       {user.role === 'admin'
                         ? 'هەموو دەسەڵاتەکان'
                         : PERMISSION_KEYS.filter((k) => user.permissions[k])
@@ -335,7 +344,7 @@ export default function AdminUsersPage() {
           }
         }}
       >
-        <DialogContent className="max-w-[95vw] sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContent} dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-center">دڵنیابوونەوە</DialogTitle>
             <DialogDescription className="text-center">
@@ -371,7 +380,7 @@ export default function AdminUsersPage() {
 
       {/* Add / Edit user */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto sm:max-w-md" dir="rtl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-center">
               {editingId ? 'دەستکاری بەکارهێنەر' : 'زیادکردنی بەکارهێنەر نوێ'}
@@ -456,6 +465,6 @@ export default function AdminUsersPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageShell>
   )
 }

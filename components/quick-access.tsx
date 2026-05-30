@@ -72,14 +72,14 @@ const quickAccessItems = [
 
 export const QuickAccess = memo(function QuickAccess() {
   return (
-    <div className="px-4 lg:px-6">
+    <div className="px-3 sm:px-0 lg:px-6">
       <Card className="border-0  bg-white dark:bg-slate-900">
         <CardContent className="pt-6">
         <div className="mb-6 text-center">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">دەستپێڕاگەیشتن خێرا</h3>
           <p className="text-sm text-slate-600 dark:text-slate-400">بەشە سەرەکییەکانی سیستەمەکە</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
           {quickAccessItems.map((item) => {
             const Icon = item.icon
             return (

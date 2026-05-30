@@ -36,6 +36,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  DashboardPageShell,
+  mobileInset,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContentWide,
+} from "@/components/dashboard-page-shell"
 
 type ReportType = "expenses" | "installments" | "employees" | "sales" | "payment-history" | "appointments"
 
@@ -1195,30 +1206,28 @@ function ReportsPageContent() {
   }
 
   return (
-    <div className="space-y-4" dir="rtl">
-      <div>
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">ڕاپۆرتەکان</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            راپۆرتی ئێستا: <span className="font-semibold text-foreground">{reportPeriodLabel}</span>
-          </p>
-        </div>
+    <DashboardPageShell>
+      <div className={mobileInset}>
+        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">ڕاپۆرتەکان</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          راپۆرتی ئێستا: <span className="font-semibold text-foreground">{reportPeriodLabel}</span>
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className={`grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-3 ${mobileInset}`}>
         <div className="relative group md:col-span-2">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-[#2ea7b8] to-[#3dc1d3] opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-            <div className="relative bg-[#e0f7fa] dark:bg-slate-900 rounded-2xl p-6 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-[#2ea7b8] dark:hover:border-slate-600">
-              <div className="flex items-start justify-between mb-6">
-                <div className="p-3 bg-gradient-to-r from-[#2ea7b8] to-[#3dc1d3] rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="size-6 text-white" />
+            <div className="relative bg-[#e0f7fa] dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-[#2ea7b8] dark:hover:border-slate-600 h-full">
+              <div className="flex items-start justify-between mb-3 sm:mb-6">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-[#2ea7b8] to-[#3dc1d3] rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="size-4 sm:size-6 text-white" />
                 </div>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-[#b2ebf2] dark:bg-[#2ea7b8]/30 text-[#2ea7b8] dark:text-[#3dc1d3]">
+                <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-[#b2ebf2] dark:bg-[#2ea7b8]/30 text-[#2ea7b8] dark:text-[#3dc1d3]">
                   ڕاپۆرت
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-6">دەتوانی ڕاپۆرتی هەموو بەشەکان ببینی لەم بەشە و پرێنت بکەیت</p>
-              <div className="grid grid-cols-2 gap-3">
+              <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-3 sm:mb-6">دەتوانی ڕاپۆرتی هەموو بەشەکان ببینی لەم بەشە و پرێنت بکەیت</p>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <Button
                   onClick={() => onChangeReport("expenses")}
                   variant={activeReport === "expenses" ? "default" : "outline"}
@@ -1265,23 +1274,23 @@ function ReportsPageContent() {
 
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-red-50 dark:bg-slate-900 rounded-2xl p-9 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Wallet className="size-6 text-white" />
+          <div className="relative bg-red-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-9 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600 h-full col-span-2 md:col-span-1">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
                 کۆی گشتی
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
               {activeReport === "expenses" ? "کۆی گشتی خەرجیەکان" :
                activeReport === "employees" ? "کۆی گشتی مووچەکان" :
                activeReport === "sales" ? "کۆی گشتی قازانج" :
                activeReport === "appointments" ? "کۆی گشتی داهات" :
                activeReport === "payment-history" ? "کۆی گشتی پارەدان" : "کۆی گشتی قیستەکان"}
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
               {activeReport === "appointments"
                 ? formatAppointmentMoney(appointmentsTotal)
                 : formatMoney(activeReport === "expenses" ? expenseTotal : activeReport === "employees" ? employeesTotal : activeReport === "sales" ? salesTotal : activeReport === "payment-history" ? paymentHistoryTotal : installmentsTotal)}
@@ -1305,7 +1314,7 @@ function ReportsPageContent() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <div className={`flex items-center gap-2 overflow-x-auto pb-2 ${mobileInset}`}>
         {reportTabs.map((tab) => (
           <Button
             key={tab.key}
@@ -1324,8 +1333,8 @@ function ReportsPageContent() {
         ))}
       </div>
 
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-border/40">
+      <div className={`space-y-4 ${mobileInset}`}>
+        <div className="flex flex-wrap items-center gap-4 p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-border/40">
           <label className="text-sm font-semibold text-foreground">مانگ و ساڵی راپۆرت:</label>
           <Select value={String(selectedReportMonth)} onValueChange={(val) => setSelectedReportMonth(parseInt(val))}>
             <SelectTrigger className="w-40">
@@ -1368,17 +1377,17 @@ function ReportsPageContent() {
 
       <div>
       {activeReport === "expenses" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="overflow-x-auto">
-            <Table>
+        <div className={mobileTableShell}>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">#</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەروار</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناونیشان</TableHead>
-                <TableHead className="text-right text-primary font-bold">جۆر</TableHead>
-                <TableHead className="text-right text-primary font-bold">شێوازی پارەدان</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی پارە</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>بەروار</TableHead>
+                <TableHead className={mobileTh}>ناونیشان</TableHead>
+                <TableHead className={mobileTh}>جۆر</TableHead>
+                <TableHead className={mobileTh}>شێوازی پارەدان</TableHead>
+                <TableHead className={mobileTh}>بڕی پارە</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1404,11 +1413,11 @@ function ReportsPageContent() {
                         : "bg-primary/2 dark:bg-slate-900/30"
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{index + 1}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatDate(expense.date)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground">{expense.title}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{expense.category}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{expense.paymentMethod}</TableCell>
+                    <TableCell className={mobileTd}>{index + 1}</TableCell>
+                    <TableCell className={mobileTd}>{formatDate(expense.date)}</TableCell>
+                    <TableCell className={mobileTdPrimary}>{expense.title}</TableCell>
+                    <TableCell className={mobileTd}>{expense.category}</TableCell>
+                    <TableCell className={mobileTd}>{expense.paymentMethod}</TableCell>
                     <TableCell>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/40 dark:text-red-300">
                         {formatMoney(expense.amount)}
@@ -1424,20 +1433,20 @@ function ReportsPageContent() {
       ) : null}
 
       {activeReport === "employees" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="overflow-x-auto">
-            <Table>
+        <div className={mobileTableShell}>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">ناوی کارمەند</TableHead>
-                <TableHead className="text-right text-primary font-bold">پلە</TableHead>
-                <TableHead className="text-right text-primary font-bold">ژمارە تەلەفۆن</TableHead>
-                <TableHead className="text-right text-primary font-bold">مووچەی بنەڕەتی</TableHead>
-                <TableHead className="text-right text-primary font-bold">کۆی پێشەکییەکان</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناونیشان</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی ماوەی مووچە</TableHead>
-                <TableHead className="text-right text-primary font-bold">مانگ</TableHead>
-                <TableHead className="text-right text-primary font-bold">پرێنت</TableHead>
+                <TableHead className={mobileTh}>ناوی کارمەند</TableHead>
+                <TableHead className={mobileTh}>پلە</TableHead>
+                <TableHead className={mobileTh}>ژمارە تەلەفۆن</TableHead>
+                <TableHead className={mobileTh}>مووچەی بنەڕەتی</TableHead>
+                <TableHead className={mobileTh}>کۆی پێشەکییەکان</TableHead>
+                <TableHead className={mobileTh}>ناونیشان</TableHead>
+                <TableHead className={mobileTh}>بڕی ماوەی مووچە</TableHead>
+                <TableHead className={mobileTh}>مانگ</TableHead>
+                <TableHead className={mobileTh}>پرێنت</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1462,11 +1471,11 @@ function ReportsPageContent() {
                       : 'bg-primary/2 dark:bg-slate-900/30'
                   } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                 >
-                  <TableCell className="text-xs font-semibold text-foreground">
+                  <TableCell className={mobileTdPrimary}>
                     {report.employee.fullName}
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{report.employee.role}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{report.employee.phonenumber}</TableCell>
+                  <TableCell className={mobileTd}>{report.employee.role}</TableCell>
+                  <TableCell className={mobileTd}>{report.employee.phonenumber}</TableCell>
                   <TableCell className="text-foreground/70">
                     <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300">
                       {formatMoney(report.basicSalary)}
@@ -1477,7 +1486,7 @@ function ReportsPageContent() {
                       {formatMoney(report.totalAdvances)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {report.employee.address || '-'}
                   </TableCell>
                   <TableCell className="text-foreground/70">
@@ -1485,10 +1494,10 @@ function ReportsPageContent() {
                       {formatMoney(report.remainingSalary)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {reportPeriodLabel}
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1507,8 +1516,8 @@ function ReportsPageContent() {
       ) : null}
 
       {activeReport === "installments" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="p-4 border-b border-border/40 bg-primary/5">
+        <div className={mobileTableShell}>
+          <div className="p-3 sm:p-4 border-b border-border/40 bg-primary/5">
             <div className="flex items-center gap-4">
               <label className="text-sm font-semibold text-foreground">فلتەری نەخۆش:</label>
               <Select value={selectedPatient} onValueChange={setSelectedPatient}>
@@ -1524,20 +1533,20 @@ function ReportsPageContent() {
               </Select>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <Table>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">#</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەروار</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناوی نەخۆش</TableHead>
-                <TableHead className="text-right text-primary font-bold">کۆی گشتی</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی دراو</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی ماوە</TableHead>
-                <TableHead className="text-right text-primary font-bold">قیستی مانگانە</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەرواری پارەدان</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەرواری داهاتوو</TableHead>
-                <TableHead className="text-right text-primary font-bold">بارودۆخ</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>بەروار</TableHead>
+                <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
+                <TableHead className={mobileTh}>کۆی گشتی</TableHead>
+                <TableHead className={mobileTh}>بڕی دراو</TableHead>
+                <TableHead className={mobileTh}>بڕی ماوە</TableHead>
+                <TableHead className={mobileTh}>قیستی مانگانە</TableHead>
+                <TableHead className={mobileTh}>بەرواری پارەدان</TableHead>
+                <TableHead className={mobileTh}>بەرواری داهاتوو</TableHead>
+                <TableHead className={mobileTh}>بارودۆخ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1572,14 +1581,14 @@ function ReportsPageContent() {
                           : "bg-primary/2 dark:bg-slate-900/30"
                       } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                     >
-                      <TableCell className="text-xs font-semibold text-foreground">{index + 1}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{formatDate(item.createdAt)}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground">{item.patientName}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(item.totalAmount)}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(item.paidAmount)}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(item.remainingAmount)}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(item.installmentValue)}</TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">
+                      <TableCell className={mobileTd}>{index + 1}</TableCell>
+                      <TableCell className={mobileTd}>{formatDate(item.createdAt)}</TableCell>
+                      <TableCell className={mobileTdPrimary}>{item.patientName}</TableCell>
+                      <TableCell className={mobileTd}>{formatMoney(item.totalAmount)}</TableCell>
+                      <TableCell className={mobileTd}>{formatMoney(item.paidAmount)}</TableCell>
+                      <TableCell className={mobileTd}>{formatMoney(item.remainingAmount)}</TableCell>
+                      <TableCell className={mobileTd}>{formatMoney(item.installmentValue)}</TableCell>
+                      <TableCell className={mobileTd}>
                         {item.paymentHistory && item.paymentHistory.length > 0 ? (
                           <div className="flex items-center gap-2">
                          
@@ -1602,7 +1611,7 @@ function ReportsPageContent() {
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-xs font-semibold text-foreground/80">{item.nextPaymentDate ? formatDate(item.nextPaymentDate) : '-'}</TableCell>
+                      <TableCell className={mobileTd}>{item.nextPaymentDate ? formatDate(item.nextPaymentDate) : '-'}</TableCell>
                       <TableCell>
                         <span className={`inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl px-2 py-0.5 text-xs font-semibold ${
                           item.status === 'Paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
@@ -1623,7 +1632,7 @@ function ReportsPageContent() {
       ) : null}
 
       <Dialog open={paymentHistoryModalOpen} onOpenChange={setPaymentHistoryModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className={mobileDialogContentWide} dir="rtl">
           <DialogHeader>
             <DialogTitle>مێژووی پارەدان - {selectedInstallment?.patientName}</DialogTitle>
           </DialogHeader>
@@ -1701,19 +1710,19 @@ function ReportsPageContent() {
       </Dialog>
 
       {activeReport === "sales" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="overflow-x-auto">
-            <Table>
+        <div className={mobileTableShell}>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">#</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەروار</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناوی کاڵا</TableHead>
-                <TableHead className="text-right text-primary font-bold">پۆل</TableHead>
-                <TableHead className="text-right text-primary font-bold">نرخی فرۆشتن</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی فرۆشتن</TableHead>
-                <TableHead className="text-right text-primary font-bold">کۆی فرۆشتن</TableHead>
-                <TableHead className="text-right text-primary font-bold">قازانج</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>بەروار</TableHead>
+                <TableHead className={mobileTh}>ناوی کاڵا</TableHead>
+                <TableHead className={mobileTh}>پۆل</TableHead>
+                <TableHead className={mobileTh}>نرخی فرۆشتن</TableHead>
+                <TableHead className={mobileTh}>بڕی فرۆشتن</TableHead>
+                <TableHead className={mobileTh}>کۆی فرۆشتن</TableHead>
+                <TableHead className={mobileTh}>قازانج</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1739,18 +1748,18 @@ function ReportsPageContent() {
                         : "bg-primary/2 dark:bg-slate-900/30"
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{index + 1}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatDate(sale.date)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground">{sale.productName}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">
+                    <TableCell className={mobileTd}>{index + 1}</TableCell>
+                    <TableCell className={mobileTd}>{formatDate(sale.date)}</TableCell>
+                    <TableCell className={mobileTdPrimary}>{sale.productName}</TableCell>
+                    <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                         {sale.category}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(sale.price)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{sale.quantity}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatMoney(sale.totalPrice)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">
+                    <TableCell className={mobileTd}>{formatMoney(sale.price)}</TableCell>
+                    <TableCell className={mobileTd}>{sale.quantity}</TableCell>
+                    <TableCell className={mobileTd}>{formatMoney(sale.totalPrice)}</TableCell>
+                    <TableCell className={mobileTd}>
                       <span className={`inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl px-2 py-0.5 text-xs font-semibold ${
                         sale.profit >= 0
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
@@ -1769,19 +1778,19 @@ function ReportsPageContent() {
       ) : null}
 
       {activeReport === "appointments" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="overflow-x-auto">
-            <Table>
+        <div className={mobileTableShell}>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">#</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەروار</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناوی نەخۆش</TableHead>
-                <TableHead className="text-right text-primary font-bold">ڕەگەز</TableHead>
-                <TableHead className="text-right text-primary font-bold">تەلەفۆن</TableHead>
-                <TableHead className="text-right text-primary font-bold">تەمەن</TableHead>
-                <TableHead className="text-right text-primary font-bold">جۆری چارەسەری</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی پارە</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>بەروار</TableHead>
+                <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
+                <TableHead className={mobileTh}>ڕەگەز</TableHead>
+                <TableHead className={mobileTh}>تەلەفۆن</TableHead>
+                <TableHead className={mobileTh}>تەمەن</TableHead>
+                <TableHead className={mobileTh}>جۆری چارەسەری</TableHead>
+                <TableHead className={mobileTh}>بڕی پارە</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1807,13 +1816,13 @@ function ReportsPageContent() {
                         : "bg-primary/2 dark:bg-slate-900/30"
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{index + 1}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatDate(appointment.appointmentDate)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground">{appointment.name}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{appointment.gender}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{appointment.phone}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{appointment.age}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">
+                    <TableCell className={mobileTd}>{index + 1}</TableCell>
+                    <TableCell className={mobileTd}>{formatDate(appointment.appointmentDate)}</TableCell>
+                    <TableCell className={mobileTdPrimary}>{appointment.name}</TableCell>
+                    <TableCell className={mobileTd}>{appointment.gender}</TableCell>
+                    <TableCell className={mobileTd}>{appointment.phone}</TableCell>
+                    <TableCell className={mobileTd}>{appointment.age}</TableCell>
+                    <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                         {appointment.treatmentType}
                       </span>
@@ -1839,16 +1848,16 @@ function ReportsPageContent() {
       ) : null}
 
       {activeReport === "payment-history" ? (
-        <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-          <div className="overflow-x-auto">
-            <Table>
+        <div className={mobileTableShell}>
+          <div className={mobileTableScroll}>
+            <Table className={mobileTableMin}>
             <TableHeader className="bg-primary/5 border-b border-border/40">
               <TableRow className="hover:bg-primary/2 transition-colors">
-                <TableHead className="text-right text-primary font-bold">#</TableHead>
-                <TableHead className="text-right text-primary font-bold">بەرواری پارەدان</TableHead>
-                <TableHead className="text-right text-primary font-bold">ناوی نەخۆش</TableHead>
-                <TableHead className="text-right text-primary font-bold">ژمارەی قیست</TableHead>
-                <TableHead className="text-right text-primary font-bold">بڕی پارە</TableHead>
+                <TableHead className={mobileTh}>#</TableHead>
+                <TableHead className={mobileTh}>بەرواری پارەدان</TableHead>
+                <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
+                <TableHead className={mobileTh}>ژمارەی قیست</TableHead>
+                <TableHead className={mobileTh}>بڕی پارە</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1874,10 +1883,10 @@ function ReportsPageContent() {
                         : "bg-primary/2 dark:bg-slate-900/30"
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className="text-xs font-semibold text-foreground">{index + 1}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">{formatDate(item.paymentDate)}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground">{item.patientName}</TableCell>
-                    <TableCell className="text-xs font-semibold text-foreground/80">
+                    <TableCell className={mobileTd}>{index + 1}</TableCell>
+                    <TableCell className={mobileTd}>{formatDate(item.paymentDate)}</TableCell>
+                    <TableCell className={mobileTdPrimary}>{item.patientName}</TableCell>
+                    <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                         {item.installmentNumber ? `قیست ${item.installmentNumber}` : '-'}
                       </span>
@@ -1896,7 +1905,7 @@ function ReportsPageContent() {
         </div>
       ) : null}
       </div>
-    </div>
+    </DashboardPageShell>
   )
 }
 

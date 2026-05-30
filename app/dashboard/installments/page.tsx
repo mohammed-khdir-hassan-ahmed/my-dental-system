@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Wallet, Calendar, Trash2, AlertCircle, Plus, DollarSign, RotateCcw, Search, Printer } from 'lucide-react';
+import { Loader2, Wallet, Calendar, Trash2, AlertCircle, Plus, DollarSign, RotateCcw, Printer } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,21 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Pagination } from '@/components/pagination';
+import {
+  DashboardPageShell,
+  mobileStatsGrid,
+  mobileInset,
+  mobileTableShell,
+  mobileTableScroll,
+  mobileTableMin,
+  mobileTh,
+  mobileTd,
+  mobileTdPrimary,
+  mobileDialogContent,
+  mobileSelectTrigger,
+  mobileBtn,
+} from '@/components/dashboard-page-shell';
+import { MobileListToolbar } from '@/components/mobile-list-toolbar';
 
 interface Installment {
   id: number;
@@ -544,32 +559,30 @@ export default function InstallmentsPage() {
   // Pagination handlers
 
   return (
-    <div dir="rtl" className="space-y-8">
-
-
+    <DashboardPageShell>
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-start gap-3">
+        <div className={`rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-start gap-3 ${mobileInset}`}>
           <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className={`${mobileStatsGrid} ${mobileInset}`}>
         {/* Total Debt Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Wallet className="size-6 text-white" />
+          <div className="relative bg-blue-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-blue-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                 قەرز
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی قەرزەکان لای نەخۆش</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{totalDebt.toLocaleString('en-US')} IQD</h3>
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی قەرزەکان لای نەخۆش</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{totalDebt.toLocaleString('en-US')} IQD</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
@@ -585,17 +598,17 @@ export default function InstallmentsPage() {
         {/* Expected This Month Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-green-50 dark:bg-slate-900 rounded-2xl p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-green-200 dark:hover:border-slate-600">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Calendar className="size-6 text-white" />
+          <div className="relative bg-green-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-5 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-green-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-2 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Calendar className="size-4 sm:size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
                 ئەم مانگە
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">قیستە چاوەڕوانکراوەکانی ئەم مانگە</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{expectedThisMonth.toLocaleString('en-US')} IQD</h3>
+            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">قیستە چاوەڕوانکراوەکانی ئەم مانگە</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{expectedThisMonth.toLocaleString('en-US')} IQD</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
@@ -609,21 +622,13 @@ export default function InstallmentsPage() {
         </div>
       </div>
 
-      {/* Search and Add Button */}
-      <div className="flex flex-row items-center justify-between gap-3">
-        <div className="flex-1 relative">
-          <Search className="absolute opacity-60 right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground  pointer-events-none" />
-          <Input 
-            type="text"
-            placeholder="گەڕان بە ناوی نەخۆش یان بارودۆخ"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg opacity-60 border border-border/90 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-10 h-10"
-          />
-        </div>
-        <div className="flex items-center gap-2">
+      <MobileListToolbar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="گەڕان بە ناوی نەخۆش یان بارودۆخ"
+        filterSlot={
           <Select value={statusFilter} onValueChange={(value: 'all' | 'Paid' | 'Pending' | 'Overdue') => setStatusFilter(value)}>
-            <SelectTrigger className="w-[140px] rounded-lg border border-border/90 py-2 px-3" size="default">
+            <SelectTrigger className={`flex-1 min-w-[120px] sm:flex-none sm:w-auto ${mobileSelectTrigger}`}>
               <SelectValue placeholder="فلتەری بارودۆخ" />
             </SelectTrigger>
             <SelectContent>
@@ -633,32 +638,35 @@ export default function InstallmentsPage() {
               <SelectItem value="Overdue">دواکەوتوو</SelectItem>
             </SelectContent>
           </Select>
-          <Button 
+        }
+        actionSlot={
+          <Button
             onClick={() => setOpenAddDialog(true)}
-            className="bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-2 text-white font-semibold px-4 py-4.5 whitespace-nowrap transition-all duration-150"
+            className={`flex-1 sm:flex-none bg-primary hover:shadow-lg hover:shadow-primary/30 active:scale-95 active:shadow-inner gap-1.5 text-white font-semibold px-3 sm:px-4 whitespace-nowrap transition-all duration-150 ${mobileBtn}`}
           >
             پلانێکی نوێ
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Table */}
-      <div className="rounded-xl border border-border/90 overflow-hidden bg-card">
-        <Table>
+      <div className={mobileTableShell}>
+        <div className={mobileTableScroll}>
+          <Table className={mobileTableMin}>
           <TableHeader className="bg-primary/5 border-b border-border/40">
             <TableRow className="hover:bg-primary/2 transition-colors">
-              <TableHead className="text-right text-primary font-bold">ناوی نەخۆش</TableHead>
-              <TableHead className="text-right text-primary font-bold">تەمەن</TableHead>
-              <TableHead className="text-right text-primary font-bold">ژمارە تەلەفۆن</TableHead>
-              <TableHead className="text-right text-primary font-bold">ناونیشان</TableHead>
-              <TableHead className="text-right text-primary font-bold">کۆی گشتی</TableHead>
-              <TableHead className="text-right text-primary font-bold">بڕی دراو</TableHead>
-              <TableHead className="text-right text-primary font-bold">بڕی ماوە</TableHead>
-              <TableHead className="text-right text-primary font-bold">قیستی مانگانە</TableHead>
-              <TableHead className="text-right text-primary font-bold">بەرواری داهاتوو</TableHead>
-              <TableHead className="text-right text-primary font-bold">بارودۆخ</TableHead>
-              <TableHead className="text-center text-primary font-bold">کرداری</TableHead>
+              <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
+              <TableHead className={mobileTh}>تەمەن</TableHead>
+              <TableHead className={mobileTh}>ژمارە تەلەفۆن</TableHead>
+              <TableHead className={mobileTh}>ناونیشان</TableHead>
+              <TableHead className={mobileTh}>کۆی گشتی</TableHead>
+              <TableHead className={mobileTh}>بڕی دراو</TableHead>
+              <TableHead className={mobileTh}>بڕی ماوە</TableHead>
+              <TableHead className={mobileTh}>قیستی مانگانە</TableHead>
+              <TableHead className={mobileTh}>بەرواری داهاتوو</TableHead>
+              <TableHead className={mobileTh}>بارودۆخ</TableHead>
+              <TableHead className={`${mobileTh} text-center`}>کرداری</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -681,23 +689,23 @@ export default function InstallmentsPage() {
                       : 'bg-primary/2 dark:bg-slate-900/30'
                   } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                 >
-                  <TableCell className="text-xs font-semibold text-foreground">{installment.patientName}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{installment.age || '-'}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{installment.phoneNumber || '-'}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">{installment.address || '-'}</TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTdPrimary}>{installment.patientName}</TableCell>
+                  <TableCell className={mobileTd}>{installment.age || '-'}</TableCell>
+                  <TableCell className={mobileTd}>{installment.phoneNumber || '-'}</TableCell>
+                  <TableCell className={mobileTd}>{installment.address || '-'}</TableCell>
+                  <TableCell className={mobileTd}>
                     {parseFloat(installment.totalAmount).toLocaleString('en-US')} IQD
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {parseFloat(installment.paidAmount).toLocaleString('en-US')} IQD
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {parseFloat(installment.remainingAmount).toLocaleString('en-US')} IQD
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {parseFloat(installment.installmentValue).toLocaleString('en-US')} IQD
                   </TableCell>
-                  <TableCell className="text-xs font-semibold text-foreground/80">
+                  <TableCell className={mobileTd}>
                     {installment.nextPaymentDate ? (
                       new Date(installment.nextPaymentDate).toLocaleDateString('ku-IQ', {
                         year: 'numeric',
@@ -708,7 +716,7 @@ export default function InstallmentsPage() {
                       '-'
                     )}
                   </TableCell>
-                  <TableCell className="text-foreground/70">
+                  <TableCell className={mobileTd}>
                     <span className={`inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl px-2 py-0.5 text-xs font-semibold ${getStatusColor(installment.status)}`}>
                       {getStatusLabel(installment.status)}
                     </span>
@@ -741,10 +749,11 @@ export default function InstallmentsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="border-t border-border/40 bg-primary/2">
+      <div className="w-full border-t md:border border-border/40 bg-card md:bg-primary/2 md:rounded-xl px-2 sm:px-0">
         <Pagination
           currentPage={paginationPage}
           totalPages={totalPages}
@@ -772,7 +781,7 @@ export default function InstallmentsPage() {
           });
         }
       }}>
-        <DialogContent dir="rtl" className="sm:max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <DialogTitle>زیادکردنی پلانی قیست</DialogTitle>
             <DialogDescription>
@@ -938,7 +947,7 @@ export default function InstallmentsPage() {
           });
         }
       }}>
-        <DialogContent dir="rtl" className="sm:max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <DialogHeader>
             <DialogTitle>تۆمارکردنی قیست</DialogTitle>
             <DialogDescription>
@@ -1016,7 +1025,7 @@ export default function InstallmentsPage() {
       <Dialog open={deleteConfirm !== null} onOpenChange={(open) => {
         if (!open) setDeleteConfirm(null);
       }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent dir="rtl" className={mobileDialogContent}>
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="shrink-0">
               <div className="flex items-center justify-center h-12 w-12 rounded-full bg-destructive/10">
@@ -1067,6 +1076,6 @@ export default function InstallmentsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageShell>
   );
 }
