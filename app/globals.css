@@ -377,3 +377,13 @@
     right: auto !important;
   }
 }
+
+/* iOS Safari: font-size below 16px causes auto-zoom on input focus */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  [data-slot="select-trigger"] {
+    font-size: 16px !important;
+  }
+}

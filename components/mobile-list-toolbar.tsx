@@ -39,7 +39,7 @@ export function MobileListToolbar({
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          className={`w-full rounded-lg border-border/60 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-9 sm:pr-10 h-9 sm:h-10 text-xs sm:text-sm placeholder:text-xs sm:placeholder:text-sm ${mobileInput}`}
+          className={`w-full rounded-lg border-border/60 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 pr-9 sm:pr-10 ${mobileInput}`}
         />
       </div>
     </div>
@@ -63,13 +63,13 @@ export function MobileCustomDateRange({
         type="date"
         value={startDate}
         onChange={(e) => onStartChange(e.target.value)}
-        className={`h-9 sm:h-10 w-full text-xs sm:text-sm ${mobileInput}`}
+        className={`w-full ${mobileInput}`}
       />
       <Input
         type="date"
         value={endDate}
         onChange={(e) => onEndChange(e.target.value)}
-        className={`h-9 sm:h-10 w-full text-xs sm:text-sm ${mobileInput}`}
+        className={`w-full ${mobileInput}`}
       />
     </div>
   );

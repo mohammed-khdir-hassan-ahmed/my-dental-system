@@ -49,8 +49,8 @@ export const mobileDialogContent =
 export const mobileDialogContentWide =
   'w-[calc(100%-2rem)] max-w-[22rem] sm:max-w-lg p-3 sm:p-4 gap-2 sm:gap-4 max-h-[90vh] overflow-y-auto';
 
-export const mobileInput = 'h-8 sm:h-9 text-xs sm:text-sm';
+export const mobileInput = 'h-9 sm:h-10 text-base sm:text-sm';
 
-export const mobileSelectTrigger = 'h-8 sm:h-9 text-xs sm:text-sm';
+export const mobileSelectTrigger = 'h-9 sm:h-10 text-base sm:text-sm';
 
 export const mobileBtn = 'h-9 sm:h-10 text-xs sm:text-sm';

@@ -629,7 +629,7 @@ export default function AppointmentsPage() {
               <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                 <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ناو</label>
                 <Input
-                  className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                  className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -643,7 +643,7 @@ export default function AppointmentsPage() {
                   <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ڕەگەز</label>
                   <div className="sm:col-span-2">
                     <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
-                      <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                      <SelectTrigger className="h-9 sm:h-10 text-base sm:text-sm">
                         <SelectValue placeholder="ڕەگەز" />
                       </SelectTrigger>
                       <SelectContent dir="rtl">
@@ -656,7 +656,7 @@ export default function AppointmentsPage() {
                 <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەمەن</label>
                   <Input
-                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                     name="age"
                     type="number"
                     value={formData.age}
@@ -670,7 +670,7 @@ export default function AppointmentsPage() {
               <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                 <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەلەفۆن</label>
                 <Input
-                  className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                  className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -683,7 +683,7 @@ export default function AppointmentsPage() {
                 <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">چارەسەر</label>
                 <div className="sm:col-span-2">
                   <Select value={formData.treatmentType} onValueChange={(value) => handleSelectChange('treatmentType', value)}>
-                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                    <SelectTrigger className="h-9 sm:h-10 text-base sm:text-sm">
                       <SelectValue placeholder="جۆری چارەسەر" />
                     </SelectTrigger>
                     <SelectContent dir="rtl">
@@ -701,7 +701,7 @@ export default function AppointmentsPage() {
                 <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بەروار</label>
                   <Input
-                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                     name="appointmentDate"
                     type="date"
                     value={formData.appointmentDate}
@@ -712,7 +712,7 @@ export default function AppointmentsPage() {
                 <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">پارە</label>
                   <Input
-                    className="sm:col-span-2 h-8 sm:h-9 text-xs sm:text-sm"
+                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                     name="money"
                     type="text"
                     inputMode="numeric"

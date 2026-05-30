@@ -159,12 +159,12 @@ interface InstallmentPaymentFormData extends PaymentFormData {
   installmentId?: number;
 }
 
-const reportTabs: { key: ReportType; label: string }[] = [
-  { key: "expenses", label: "ڕاپۆرتی خەرجیەکان" },
-  { key: "employees", label: "ڕاپۆرتی کارمەندەکان" },
-  { key: "installments", label: "ڕاپۆرتی قیستەکان" },
-  { key: "sales", label: "ڕاپۆرتی فرۆشتن" },
-  { key: "appointments", label: "ڕاپۆرتی سەرەبڕین" },
+const reportTabs: { key: ReportType; label: string; shortLabel: string; icon: typeof Wallet }[] = [
+  { key: "expenses", label: "ڕاپۆرتی خەرجیەکان", shortLabel: "خەرجیەکان", icon: Wallet },
+  { key: "employees", label: "ڕاپۆرتی کارمەندەکان", shortLabel: "کارمەندەکان", icon: User },
+  { key: "installments", label: "ڕاپۆرتی قیستەکان", shortLabel: "قیستەکان", icon: TrendingUp },
+  { key: "sales", label: "ڕاپۆرتی فرۆشتن", shortLabel: "فرۆشتن", icon: DollarSign },
+  { key: "appointments", label: "ڕاپۆرتی سەرەبڕین", shortLabel: "سەرەبڕین", icon: Calendar },
 ]
 
 function formatMoney(value: string | number) {
@@ -443,6 +443,32 @@ function ReportsPageContent() {
     () => filteredPaymentHistory.reduce((sum, row) => sum + Number(row.amountPaid || 0), 0),
     [filteredPaymentHistory],
   )
+
+  const summaryTitle =
+    activeReport === "expenses" ? "کۆی گشتی خەرجیەکان" :
+    activeReport === "employees" ? "کۆی گشتی مووچەکان" :
+    activeReport === "sales" ? "کۆی گشتی قازانج" :
+    activeReport === "appointments" ? "کۆی گشتی داهات" :
+    activeReport === "payment-history" ? "کۆی گشتی پارەدان" : "کۆی گشتی قیستەکان"
+
+  const summaryTotalFormatted =
+    activeReport === "appointments"
+      ? formatAppointmentMoney(appointmentsTotal)
+      : formatMoney(
+          activeReport === "expenses" ? expenseTotal :
+          activeReport === "employees" ? employeesTotal :
+          activeReport === "sales" ? salesTotal :
+          activeReport === "payment-history" ? paymentHistoryTotal :
+          installmentsTotal,
+        )
+
+  const summaryCount =
+    activeReport === "expenses" ? filteredExpenses.length :
+    activeReport === "employees" ? employeePayrollReports.length :
+    activeReport === "sales" ? filteredSales.length :
+    activeReport === "appointments" ? filteredAppointments.length :
+    activeReport === "payment-history" ? filteredPaymentHistory.length :
+    filteredInstallments.length
 
   const onChangeReport = (nextReport: ReportType) => {
     router.push(`/dashboard/reports?type=${nextReport}`)
@@ -1208,13 +1234,97 @@ function ReportsPageContent() {
   return (
     <DashboardPageShell>
       <div className={mobileInset}>
-        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">ڕاپۆرتەکان</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-lg sm:text-2xl font-semibold text-foreground">ڕاپۆرتەکان</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
           راپۆرتی ئێستا: <span className="font-semibold text-foreground">{reportPeriodLabel}</span>
         </p>
       </div>
 
-      <div className={`grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-3 ${mobileInset}`}>
+      {/* Mobile layout */}
+      <div className={`md:hidden space-y-3 ${mobileInset}`}>
+        <div className="rounded-xl border border-red-200/60 dark:border-red-900/40 bg-red-50 dark:bg-slate-900 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg">
+              <Wallet className="size-4 text-white" />
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+              کۆی گشتی
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">{summaryTitle}</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white">{summaryTotalFormatted}</p>
+          <div className="flex items-center justify-between mt-3 p-2 rounded-lg bg-white/60 dark:bg-slate-800">
+            <span className="text-xs text-muted-foreground">تۆمار</span>
+            <span className="text-sm font-semibold">{summaryCount}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {reportTabs.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeReport === tab.key
+            return (
+              <Button
+                key={tab.key}
+                onClick={() => onChangeReport(tab.key)}
+                variant={isActive ? "default" : "outline"}
+                className={`h-10 justify-center gap-1.5 text-xs font-semibold ${
+                  isActive
+                    ? "bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
+                    : "border-border/80"
+                }`}
+              >
+                <Icon className="size-3.5 shrink-0" />
+                {tab.shortLabel}
+              </Button>
+            )
+          })}
+        </div>
+
+        <div className="rounded-xl border border-border/40 bg-slate-50 dark:bg-slate-900 p-3 space-y-2">
+          <p className="text-xs font-semibold text-foreground">مانگ و ساڵی راپۆرت</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={String(selectedReportMonth)} onValueChange={(val) => setSelectedReportMonth(parseInt(val))}>
+              <SelectTrigger className="w-full h-10 text-base sm:text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {KURDISH_MONTHS.map((monthName, i) => (
+                  <SelectItem key={i + 1} value={String(i + 1)}>{monthName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={String(selectedReportYear)}
+              onValueChange={(val) => setSelectedReportYear(Math.max(MIN_REPORT_YEAR, parseInt(val)))}
+            >
+              <SelectTrigger className="w-full h-10 text-base sm:text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableReportYears.map((year) => (
+                  <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <span className="block text-center text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg">
+            {reportPeriodLabel}
+          </span>
+        </div>
+
+        <Button
+          onClick={savePdf}
+          disabled={exporting || loading}
+          className="w-full h-10 bg-[#3dc1d3] hover:bg-[#35aebb] text-sm font-semibold"
+        >
+          <FileText className="h-4 w-4" />
+          {exporting ? "ئامادەکردنی PDF..." : "پرێنت / PDF"}
+        </Button>
+      </div>
+
+      {/* Desktop layout */}
+      <div className={`hidden md:grid md:grid-cols-3 gap-4 ${mobileInset}`}>
         <div className="relative group md:col-span-2">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-[#2ea7b8] to-[#3dc1d3] opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
             <div className="relative bg-[#e0f7fa] dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-[#2ea7b8] dark:hover:border-slate-600 h-full">
@@ -1226,114 +1336,68 @@ function ReportsPageContent() {
                   ڕاپۆرت
                 </div>
               </div>
-              <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-3 sm:mb-6">دەتوانی ڕاپۆرتی هەموو بەشەکان ببینی لەم بەشە و پرێنت بکەیت</p>
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <Button
-                  onClick={() => onChangeReport("expenses")}
-                  variant={activeReport === "expenses" ? "default" : "outline"}
-                  className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
-                >
-                  <Wallet className="size-4" />
-                  خەرجیەکان
-                </Button>
-                <Button
-                  onClick={() => onChangeReport("installments")}
-                  variant={activeReport === "installments" ? "default" : "outline"}
-                  className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
-                >
-                  <TrendingUp className="size-4" />
-                  قیستەکان
-                </Button>
-                <Button
-                  onClick={() => onChangeReport("sales")}
-                  variant={activeReport === "sales" ? "default" : "outline"}
-                  className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
-                >
-                  <DollarSign className="size-4" />
-                  فرۆشتن
-                </Button>
-                <Button
-                  onClick={() => onChangeReport("employees")}
-                  variant={activeReport === "employees" ? "default" : "outline"}
-                  className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
-                >
-                  <User className="size-4" />
-                  کارمەندەکان
-                </Button>
-                <Button
-                  onClick={() => onChangeReport("appointments")}
-                  variant={activeReport === "appointments" ? "default" : "outline"}
-                  className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
-                >
-                  <Calendar className="size-4" />
-                  سەرەبڕین
-                </Button>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-6">دەتوانی ڕاپۆرتی هەموو بەشەکان ببینی لەم بەشە و پرێنت بکەیت</p>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                {reportTabs.map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <Button
+                      key={tab.key}
+                      onClick={() => onChangeReport(tab.key)}
+                      variant={activeReport === tab.key ? "default" : "outline"}
+                      className="justify-start gap-2 bg-[#2ea7b8] hover:bg-[#2496a6] text-white border-[#2ea7b8]"
+                    >
+                      <Icon className="size-4" />
+                      {tab.shortLabel}
+                    </Button>
+                  )
+                })}
               </div>
             </div>
           </div>
 
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
-          <div className="relative bg-red-50 dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-9 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600 h-full col-span-2 md:col-span-1">
-            <div className="flex items-start justify-between mb-2 sm:mb-4">
-              <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Wallet className="size-4 sm:size-6 text-white" />
+          <div className="relative bg-red-50 dark:bg-slate-900 rounded-2xl p-9 transition-all duration-300 group-hover:shadow-lg border border-transparent hover:border-red-200 dark:hover:border-slate-600 h-full">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="size-6 text-white" />
               </div>
-              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
                 کۆی گشتی
               </div>
             </div>
-            <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
-              {activeReport === "expenses" ? "کۆی گشتی خەرجیەکان" :
-               activeReport === "employees" ? "کۆی گشتی مووچەکان" :
-               activeReport === "sales" ? "کۆی گشتی قازانج" :
-               activeReport === "appointments" ? "کۆی گشتی داهات" :
-               activeReport === "payment-history" ? "کۆی گشتی پارەدان" : "کۆی گشتی قیستەکان"}
-            </p>
-            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
-              {activeReport === "appointments"
-                ? formatAppointmentMoney(appointmentsTotal)
-                : formatMoney(activeReport === "expenses" ? expenseTotal : activeReport === "employees" ? employeesTotal : activeReport === "sales" ? salesTotal : activeReport === "payment-history" ? paymentHistoryTotal : installmentsTotal)}
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
-                <div className="flex items-center gap-2">
-                  <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
-                  <span className="text-xs text-slate-600 dark:text-slate-400">تۆمار</span>
-                </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                  {activeReport === "expenses" ? filteredExpenses.length :
-                   activeReport === "employees" ? employeePayrollReports.length :
-                   activeReport === "sales" ? filteredSales.length :
-                   activeReport === "appointments" ? filteredAppointments.length :
-                   activeReport === "payment-history" ? filteredPaymentHistory.length : filteredInstallments.length}
-                </span>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{summaryTitle}</p>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{summaryTotalFormatted}</h3>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="text-xs text-slate-600 dark:text-slate-400">تۆمار</span>
               </div>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{summaryCount}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className={`flex items-center gap-2 overflow-x-auto pb-2 ${mobileInset}`}>
-        {reportTabs.map((tab) => (
-          <Button
-            key={tab.key}
-            variant={activeReport === tab.key ? "default" : "outline"}
-            className={activeReport === tab.key ? "bg-[#3dc1d3] hover:bg-[#35aebb]" : "whitespace-nowrap"}
-            onClick={() => onChangeReport(tab.key)}
-          >
-            {tab.key === "expenses" ? <TrendingDown className="h-4 w-4" /> :
-             tab.key === "employees" ? <User className="h-4 w-4" /> :
-             tab.key === "sales" ? <TrendingUp className="h-4 w-4" /> :
-             tab.key === "appointments" ? <Calendar className="h-4 w-4" /> :
-             tab.key === "payment-history" ? <Wallet className="h-4 w-4" /> :
-             <Wallet className="h-4 w-4" />}
-            {tab.label}
-          </Button>
-        ))}
+      <div className={`hidden md:flex items-center gap-2 overflow-x-auto pb-2 ${mobileInset}`}>
+        {reportTabs.map((tab) => {
+          const Icon = tab.icon
+          return (
+            <Button
+              key={tab.key}
+              variant={activeReport === tab.key ? "default" : "outline"}
+              className={activeReport === tab.key ? "bg-[#3dc1d3] hover:bg-[#35aebb]" : "whitespace-nowrap"}
+              onClick={() => onChangeReport(tab.key)}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </Button>
+          )
+        })}
       </div>
 
-      <div className={`space-y-4 ${mobileInset}`}>
+      <div className={`hidden md:block space-y-4 ${mobileInset}`}>
         <div className="flex flex-wrap items-center gap-4 p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-border/40">
           <label className="text-sm font-semibold text-foreground">مانگ و ساڵی راپۆرت:</label>
           <Select value={String(selectedReportMonth)} onValueChange={(val) => setSelectedReportMonth(parseInt(val))}>
