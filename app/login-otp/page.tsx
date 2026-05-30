@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogIn, ArrowLeft, Lock, ShieldCheck, KeyRound } from "lucide-react";
 import Image from 'next/image';
 import { notifyLoginSuccess, notifyLoginError } from '@/lib/notify';
+import { markShowDashboardWelcome } from '@/lib/login-welcome';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -68,6 +69,7 @@ export default function LoginOTP() {
                 setCode(['', '', '', '', '', '']);
                 setError(false);
                 notifyLoginSuccess();
+                markShowDashboardWelcome();
                 setTimeout(() => {
                     router.push('/dashboard');
                 }, 1500);

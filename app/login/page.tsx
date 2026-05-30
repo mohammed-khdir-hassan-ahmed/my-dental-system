@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogIn } from "lucide-react";
 import Image from 'next/image';
 import { notifyLoginSuccess, notifyLoginError } from '@/lib/notify';
+import { markShowDashboardWelcome } from '@/lib/login-welcome';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -31,6 +32,7 @@ export default function Login() {
                 setEmail('');
                 setPassword('');
                 notifyLoginSuccess();
+                markShowDashboardWelcome();
                 // Redirect after 2 seconds
                 setTimeout(() => {
                     router.push('/dashboard');
