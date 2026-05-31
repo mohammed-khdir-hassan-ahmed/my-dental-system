@@ -36,16 +36,6 @@ export async function POST(request: Request) {
       method: 'otp',
     });
 
-    // نێردنی push notification بۆ مۆبایلی ئەدمین
-    const { combined } = formatLoginDateTime(new Date());
-    const pushResult = await sendPushToAdmins({
-      title: '🔑 چوونەژوورەوەی نوێ (کۆدی تایبەت)',
-      body: `بەکارهێنەرێک بە کۆدی تایبەت چووە ژوورەوە\n${combined}`,
-      tag: 'login-otp-' + Date.now(),
-    });
-    if (!pushResult.vapidConfigured || pushResult.subscriptionsFound === 0 || pushResult.sent === 0) {
-      console.warn('Push delivery check (login-otp):', pushResult);
-    }
 
     // If code is valid, create a session cookie
     const response = NextResponse.json(

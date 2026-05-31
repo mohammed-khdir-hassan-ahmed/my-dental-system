@@ -49,17 +49,6 @@ export async function POST(request: NextRequest) {
         userId: user[0].id,
         method: 'email',
       });
-
-   
-      const { combined } = formatLoginDateTime(new Date());
-      const pushResult = await sendPushToAdmins({
-        title: '🔑 چوونەژوورەوەی نوێ',
-        body: `${user[0].email} چووە ژوورەوە\n${combined}`,
-        tag: 'login-' + Date.now(),
-      });
-      if (!pushResult.vapidConfigured || pushResult.subscriptionsFound === 0 || pushResult.sent === 0) {
-        console.warn('Push delivery check (login):', pushResult);
-      }
     }
 
     const response = NextResponse.json(

@@ -3,21 +3,50 @@ import { db } from '@/db/drizzle'
 import { adminNotificationsTable } from '@/db/schema'
 import { getSessionUser } from '@/lib/auth'
 import { formatMoney } from '@/lib/notification-utils'
+import { sendPushToAdmins } from '@/lib/send-push'
 
 export type LoginMethod = 'email' | 'otp' | 'action'
 
 export function formatLoginDateTime(date: Date) {
-  const dateStr = date.toLocaleDateString('ku-IQ', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  })
-  const timeStr = date.toLocaleTimeString('ku-IQ', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  })
+  const weekdays = [
+    'یەکشەممە',
+    'دووشەممە',
+    'سێشەممە',
+    'چوارشەممە',
+    'پێنجشەممە',
+    'هەینی',
+    'شەممە'
+  ]
+  const months = [
+    'کانوونی دووەم',
+    'شوبات',
+    'ئازار',
+    'نیسان',
+    'ئایار',
+    'حوزەیران',
+    'تەممووز',
+    'ئاب',
+    'ئەیلوول',
+    'تشرینی یەکەم',
+    'تشرینی دووەم',
+    'کانوونی یەکەم'
+  ]
+
+  const weekday = weekdays[date.getDay()]
+  const day = date.getDate()
+  const month = months[date.getMonth()]
+  const year = date.getFullYear()
+
+  // Format time (e.g. 04:15 پێش نیوەڕۆ / دوای نیوەڕۆ)
+  let hours = date.getHours()
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const ampm = hours >= 12 ? 'دوای نیوەڕۆ' : 'پێش نیوەڕۆ'
+  hours = hours % 12
+  hours = hours ? hours : 12 // the hour '0' should be '12'
+  const hoursStr = String(hours).padStart(2, '0')
+
+  const dateStr = `${weekday}، ${day}ی ${month}ی ${year}`
+  const timeStr = `${hoursStr}:${minutes} ${ampm}`
   return { dateStr, timeStr, combined: `${dateStr} — کاتژمێر ${timeStr}` }
 }
 
@@ -44,6 +73,14 @@ export async function recordAdminNotification(params: {
       title: params.title,
       message: params.message,
       read: false,
+    })
+
+    // ناردنی push notification بە شێوەیەکی خۆکار بۆ مۆبایل و وێبگەڕی ئەدمینەکان
+    await sendPushToAdmins({
+      title: params.title,
+      body: params.message,
+      tag: params.type + '-' + Date.now(),
+      url: '/dashboard',
     })
   } catch (error) {
     console.error('recordAdminNotification error:', error)

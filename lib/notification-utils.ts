@@ -34,11 +34,26 @@ export function formatNotificationTime(date: Date) {
   if (seconds < 60) return 'ئێستا'
   if (minutes < 60) return `پێش ${minutes} خولەک`
   if (hours < 24) return `پێش ${hours} کاتژمێر`
-  return date.toLocaleDateString('ku-IQ', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+
+  const months = [
+    'کانوونی دووەم',
+    'شوبات',
+    'ئازار',
+    'نیسان',
+    'ئایار',
+    'حوزەیران',
+    'تەممووز',
+    'ئاب',
+    'ئەیلوول',
+    'تشرینی یەکەم',
+    'تشرینی دووەم',
+    'کانوونی یەکەم'
+  ]
+  const day = date.getDate()
+  const month = months[date.getMonth()]
+  const year = date.getFullYear()
+
+  return `${day}ی ${month}ی ${year}`
 }
 
 export interface NotificationStyle {

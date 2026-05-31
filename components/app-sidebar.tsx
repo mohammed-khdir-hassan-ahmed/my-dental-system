@@ -23,7 +23,6 @@ import {
   BarChart3Icon,
   Cog,
   CalendarIcon,
-  Shield,
 } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
 
@@ -69,11 +68,6 @@ const navMain = [
       { title: " فرۆشتن", url: "/dashboard/reports?type=sales" },
       { title: " سەرەبڕین", url: "/dashboard/reports?type=appointments" },
     ],
-  },
-  {
-    title: "بەکارهێنەرەکان",
-    url: "/dashboard/admin/users",
-    icon: <Shield />,
   },
   {
     title: "ڕێکخستن",
