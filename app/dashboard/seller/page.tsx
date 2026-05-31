@@ -121,7 +121,7 @@ export default function SellerPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [timePeriod, setTimePeriod] = useState<'month' | 'week' | 'today' | 'all' | 'custom'>('today');
+  const [timePeriod, setTimePeriod] = useState<'month' | 'week' | 'today' | 'all' | 'custom'>('month');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [paginationPage, setPaginationPage] = useState(1);
@@ -264,6 +264,10 @@ export default function SellerPage() {
     const cleanedPrice = stripCommas(formData.price);
     if (!cleanedPrice || isNaN(Number(cleanedPrice)) || Number(cleanedPrice) <= 0) {
       notifyActionError('تکایە نرخی دروست بنووسە', 'فۆرم ناتەواو');
+      return;
+    }
+    if (!formData.date) {
+      notifyActionError('تکایە بەرواری فرۆشتن دیاری بکە', 'فۆرم ناتەواو');
       return;
     }
 
@@ -648,6 +652,16 @@ export default function SellerPage() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-sm font-medium">بەرواری فرۆشتن</label>
+              <Input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                max={getToday()}
+              />
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium">تێبینی</label>
               <Input
                 value={formData.notes}
@@ -663,7 +677,7 @@ export default function SellerPage() {
             <Button
               onClick={handleSaveSale}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              disabled={!formData.productName || (!formData.category && !customCategory) || !formData.price}
+              disabled={!formData.productName || (!formData.category && !customCategory) || !formData.price || !formData.date}
             >
               {editingSale ? 'نوێکردنەوە' : 'تۆمارکردن'}
             </Button>
