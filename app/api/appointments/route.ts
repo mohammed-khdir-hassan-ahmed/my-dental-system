@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     await recordAdminActionFromRequest(
       request,
-      adminActionMessages.patientAdded(name, treatmentType)
+      adminActionMessages.patientAdded(name, treatmentType, money)
     );
 
     return NextResponse.json(
@@ -164,7 +164,7 @@ export async function PUT(request: NextRequest) {
 
     await recordAdminActionFromRequest(
       request,
-      adminActionMessages.patientUpdated(name)
+      adminActionMessages.patientUpdated(name, treatmentType, money)
     );
 
     return NextResponse.json(
@@ -205,7 +205,7 @@ export async function DELETE(request: NextRequest) {
     if (existing) {
       await recordAdminActionFromRequest(
         request,
-        adminActionMessages.patientDeleted(existing.name)
+        adminActionMessages.patientDeleted(existing.name, existing.treatmentType, existing.money)
       );
     }
 

@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     await recordAdminActionFromRequest(
       request,
-      adminActionMessages.installmentAdded(patientName)
+      adminActionMessages.installmentAdded(patientName, parseFloat(totalAmount))
     );
 
     return NextResponse.json(
@@ -137,6 +137,11 @@ export async function PUT(request: Request) {
       })
       .where(eq(installmentsTable.id, parseInt(id)))
       .returning();
+
+    await recordAdminActionFromRequest(
+      request,
+      adminActionMessages.installmentUpdated(patientName, parseFloat(totalAmount))
+    );
 
     return NextResponse.json(
       { message: 'سەرکەوتووبوو', installment },

@@ -113,15 +113,15 @@ export async function recordAdminActionFromRequest(
   event: { type: string; title: string; message: string }
 ) {
   const session = await getSessionUser(request as NextRequest)
-  if (!session || session.isAdmin) return
+  if (!session) return
 
   await recordAdminNotification({
     type: event.type,
-    title: event.title,
-    message: `${event.message} (لەلایەن «${actorLabel(session)}»)`,
     userEmail: session.isOTPLogin ? 'بەکارهێنەری کۆدی تایبەت' : session.email,
     userId: session.isOTPLogin ? null : session.id,
     loginMethod: 'action',
+    title: event.title,
+    message: `${event.message} (لەلایەن «${actorLabel(session)}»)`,
   })
 }
 
@@ -131,78 +131,99 @@ export const adminActionMessages = {
   saleAdded: (productName: string, total: number) => ({
     type: 'sale',
     title: 'فرۆشتی نوێ',
-    message: `کاڵای «${productName}» — ${formatMoney(total)} تۆمارکرا`,
+    message: `فرۆشتنی کاڵای «${productName}» بە بڕی ${formatMoney(total)} تۆمارکرا`,
   }),
   saleUpdated: (productName: string) => ({
     type: 'sale',
     title: 'فرۆشتن نوێکرایەوە',
-    message: `کاڵای «${productName}» نوێکرایەوە`,
+    message: `فرۆشتنی کاڵای «${productName}» نوێکرایەوە`,
   }),
   saleDeleted: (productName: string) => ({
     type: 'sale_delete',
     title: 'فرۆشتن سڕایەوە',
-    message: `کاڵای «${productName}» سڕایەوە`,
+    message: `فرۆشتنی کاڵای «${productName}» سڕایەوە`,
   }),
-  patientAdded: (name: string, treatment?: string) => ({
-    type: 'patient',
-    title: 'نەخۆشی نوێ',
-    message: treatment
-      ? `نەخۆشی «${name}» — چارەسەر: ${treatment}`
-      : `نەخۆشی «${name}» تۆمارکرا`,
-  }),
-  patientUpdated: (name: string) => ({
-    type: 'patient',
-    title: 'نەخۆش نوێکرایەوە',
-    message: `نەخۆشی «${name}» نوێکرایەوە`,
-  }),
-  patientDeleted: (name: string) => ({
-    type: 'patient_delete',
-    title: 'نەخۆش سڕایەوە',
-    message: `نەخۆشی «${name}» سڕایەوە`,
-  }),
+  patientAdded: (name: string, treatment?: string, money?: string | number) => {
+    const moneyVal = Number(money) || 0
+    const moneyStr = moneyVal > 0 ? ` · بڕی دراو: ${formatMoney(moneyVal)}` : ''
+    return {
+      type: 'patient',
+      title: 'سەردانی نەخۆش / نەخۆشی نوێ',
+      message: treatment
+        ? `نەخۆش «${name}» سەردانی کرد بۆ چارەسەری: ${treatment}${moneyStr}`
+        : `نەخۆش «${name}» سەردانی کرد و تۆمارکرا${moneyStr}`,
+    }
+  },
+  patientUpdated: (name: string, treatment?: string, money?: string | number) => {
+    const moneyVal = Number(money) || 0
+    const moneyStr = moneyVal > 0 ? ` · بڕی دراو: ${formatMoney(moneyVal)}` : ''
+    const detail = treatment ? ` · چارەسەر: ${treatment}` : ''
+    return {
+      type: 'patient',
+      title: 'سەردانی نەخۆش نوێکرایەوە',
+      message: `زانیاری سەردانی نەخۆش «${name}» نوێکرایەوە${detail}${moneyStr}`,
+    }
+  },
+  patientDeleted: (name: string, treatment?: string, money?: string | number) => {
+    const moneyVal = Number(money) || 0
+    const moneyStr = moneyVal > 0 ? ` · بڕی دراو: ${formatMoney(moneyVal)}` : ''
+    const detail = treatment ? ` · چارەسەر: ${treatment}` : ''
+    return {
+      type: 'patient_delete',
+      title: 'سەردانی نەخۆش سڕایەوە',
+      message: `سەردانی نەخۆش «${name}» سڕایەوە${detail}${moneyStr}`,
+    }
+  },
   expenseAdded: (title: string, amount: number) => ({
     type: 'expense',
     title: 'خەرجی نوێ',
-    message: `«${title}» — ${formatMoney(amount)}`,
+    message: `خەرجی نوێ «${title}» بە بڕی ${formatMoney(amount)} تۆمارکرا`,
   }),
   expenseUpdated: (title: string) => ({
     type: 'expense',
     title: 'خەرجی نوێکرایەوە',
-    message: `«${title}» نوێکرایەوە`,
+    message: `خەرجی «${title}» نوێکرایەوە`,
   }),
   expenseDeleted: (title: string) => ({
     type: 'expense_delete',
     title: 'خەرجی سڕایەوە',
-    message: `«${title}» سڕایەوە`,
+    message: `خەرجی «${title}» سڕایەوە`,
   }),
-  installmentAdded: (name: string) => ({
+  installmentAdded: (name: string, totalAmount: number) => ({
     type: 'installment',
     title: 'قیستی نوێ',
-    message: `قیست بۆ «${name}» زیادکرا`,
+    message: `قیستی نوێ بۆ نەخۆش «${name}» بە بڕی گشتی ${formatMoney(totalAmount)} تۆمارکرا`,
   }),
   installmentPayment: (name: string, amount: number) => ({
     type: 'installment_payment',
     title: 'پارەدانی قیست',
-    message: `${formatMoney(amount)} بۆ «${name}»`,
+    message: `نەخۆش «${name}» بڕی ${formatMoney(amount)} قیستی دا`,
+  }),
+  installmentUpdated: (name: string, totalAmount?: number) => ({
+    type: 'installment',
+    title: 'قیست نوێکرایەوە',
+    message: totalAmount
+      ? `زانیاری قیستی نەخۆش «${name}» نوێکرایەوە (بڕی گشتی: ${formatMoney(totalAmount)})`
+      : `زانیاری قیستی نەخۆش «${name}» نوێکرایەوە`,
   }),
   installmentDeleted: (name: string) => ({
     type: 'installment_delete',
     title: 'قیست سڕایەوە',
-    message: `قیستی «${name}» سڕایەوە`,
+    message: `قیستی نەخۆش «${name}» سڕایەوە`,
   }),
   staffAdded: (name: string) => ({
     type: 'staff',
     title: 'کارمەندی نوێ',
-    message: `«${name}» زیادکرا`,
+    message: `کارمەندی نوێ «${name}» تۆمارکرا`,
   }),
   staffUpdated: (name: string) => ({
     type: 'staff',
     title: 'کارمەند نوێکرایەوە',
-    message: `«${name}» نوێکرایەوە`,
+    message: `زانیاری کارمەند «${name}» نوێکرایەوە`,
   }),
   staffDeleted: () => ({
     type: 'staff_delete',
     title: 'کارمەند سڕایەوە',
-    message: 'کارمەندێک سڕایەوە',
+    message: 'کارمەندێک لە سیستەمەوە سڕایەوە',
   }),
 }
