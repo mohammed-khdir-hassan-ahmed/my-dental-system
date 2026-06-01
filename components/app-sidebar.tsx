@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import {
   LayoutDashboardIcon,
-  ListIcon,
+  ShoppingCartIcon,
   UsersIcon,
   DollarSignIcon,
   TrendingDownIcon,
@@ -40,7 +40,7 @@ const navMain = [
   {
     title: " بەشی فرۆشتن",
     url: "/dashboard/seller",
-    icon: <ListIcon />,
+    icon: <ShoppingCartIcon />,
   },
   {
     title: " كارمەندەکان",

@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { BottomTaskbar } from "@/components/bottom-taskbar"
 import { DashboardWelcomeOverlay } from "@/components/dashboard-welcome-overlay"
 import { DashboardRouteGuard } from "@/components/dashboard-route-guard"
 import { AdminLoginNotificationListener } from "@/components/admin-login-notification-listener"
@@ -34,7 +35,7 @@ export default function DashboardLayout({
               <SiteHeader />
               <div className="flex flex-1 flex-col bg-background overflow-y-auto no-scrollbar">
                 <div className="@container/main flex flex-1 flex-col gap-2 overflow-y-auto no-scrollbar">
-                  <div className="flex flex-col gap-6 pt-20 px-6 md:gap-8 md:pt-20 md:px-8 overflow-y-auto no-scrollbar">
+                  <div className="flex flex-col gap-6 pt-20 pb-24 px-6 md:gap-8 md:pt-20 md:pb-10 md:px-8 overflow-y-auto no-scrollbar">
                     <Suspense fallback={null}>
                       <DashboardRouteGuard>{children}</DashboardRouteGuard>
                     </Suspense>
@@ -44,6 +45,7 @@ export default function DashboardLayout({
             </SidebarInset>
           </SidebarProvider>
         </DashboardFilterProvider>
+        <BottomTaskbar />
       </UserProvider>
     </div>
   )
