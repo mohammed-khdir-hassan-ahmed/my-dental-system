@@ -9,48 +9,33 @@ const taskbarItems = [
     label: 'داشبۆرد',
     href: '/dashboard',
     icon: LayoutDashboard,
-    hoverBg: 'rgba(61,193,211,0.15)',
-    hoverColor: '#3dc1d3',
-    activeBg: 'rgba(61,193,211,0.20)',
-    shadowColor: 'rgba(61,193,211,0.30)',
   },
   {
     label: 'نۆرەگرتن',
     href: '/dashboard/appointments',
     icon: CalendarCheck,
-    hoverBg: 'rgba(59,130,246,0.15)',
-    hoverColor: '#3b82f6',
-    activeBg: 'rgba(59,130,246,0.20)',
-    shadowColor: 'rgba(59,130,246,0.30)',
   },
   {
     label: 'فرۆشتن',
     href: '/dashboard/seller',
     icon: ShoppingCart,
-    hoverBg: 'rgba(16,185,129,0.15)',
-    hoverColor: '#10b981',
-    activeBg: 'rgba(16,185,129,0.20)',
-    shadowColor: 'rgba(16,185,129,0.30)',
   },
   {
     label: 'قیستەکان',
     href: '/dashboard/installments',
     icon: CreditCard,
-    hoverBg: 'rgba(249,115,22,0.15)',
-    hoverColor: '#f97316',
-    activeBg: 'rgba(249,115,22,0.20)',
-    shadowColor: 'rgba(249,115,22,0.30)',
   },
   {
     label: 'خەرجیەکان',
     href: '/dashboard/expenses',
     icon: Wallet,
-    hoverBg: 'rgba(244,63,94,0.15)',
-    hoverColor: '#f43f5e',
-    activeBg: 'rgba(244,63,94,0.20)',
-    shadowColor: 'rgba(244,63,94,0.30)',
   },
 ]
+
+const hoverBg = 'rgba(61,193,211,0.15)'
+const hoverColor = '#3dc1d3'
+const activeBg = 'rgba(61,193,211,0.20)'
+const shadowColor = 'rgba(61,193,211,0.30)'
 
 export function BottomTaskbar() {
   const pathname = usePathname()
@@ -75,8 +60,8 @@ export function BottomTaskbar() {
             <Link key={item.href} href={item.href} className="group relative">
               <div
                 style={isActive ? {
-                  background: item.activeBg,
-                  boxShadow: `0 3px 12px ${item.shadowColor}`,
+                  background: activeBg,
+                  boxShadow: `0 3px 12px ${shadowColor}`,
                 } : {}}
                 className={`
                   flex flex-col items-center gap-1 px-4 py-2 rounded-[14px]
@@ -86,10 +71,10 @@ export function BottomTaskbar() {
                 onMouseEnter={(e) => {
                   if (!isActive) {
                     const el = e.currentTarget
-                    el.style.background = item.hoverBg
-                    el.style.boxShadow = `0 3px 10px ${item.shadowColor}`
-                    el.querySelector('.dock-icon')?.setAttribute('style', `color: ${item.hoverColor}`)
-                    el.querySelector('.dock-label')?.setAttribute('style', `color: ${item.hoverColor}`)
+                    el.style.background = hoverBg
+                    el.style.boxShadow = `0 3px 10px ${shadowColor}`
+                    el.querySelector('.dock-icon')?.setAttribute('style', `color: ${hoverColor}`)
+                    el.querySelector('.dock-label')?.setAttribute('style', `color: ${hoverColor}`)
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -104,12 +89,12 @@ export function BottomTaskbar() {
               >
                 <Icon
                   className="dock-icon w-[18px] h-[18px] transition-colors duration-150"
-                  style={{ color: isActive ? item.hoverColor : undefined }}
+                  style={{ color: isActive ? hoverColor : undefined }}
                   strokeWidth={isActive ? 2.2 : 1.7}
                 />
                 <span
                   className="dock-label text-[9.5px] font-semibold leading-none tracking-wide transition-colors duration-150"
-                  style={{ color: isActive ? item.hoverColor : undefined }}
+                  style={{ color: isActive ? hoverColor : undefined }}
                 >
                   {item.label}
                 </span>
