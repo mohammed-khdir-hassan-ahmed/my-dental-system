@@ -18,6 +18,7 @@ interface Staff {
   age?: number;
   address?: string;
   createdAt?: string;
+  pending_sync?: boolean;
 }
 
 interface MonthlyRecord {
@@ -29,6 +30,7 @@ interface MonthlyRecord {
   note?: string;
   monthKey: string;
   isPaid: boolean;
+  pending_sync?: boolean;
 }
 
 interface StaffQueryParams {

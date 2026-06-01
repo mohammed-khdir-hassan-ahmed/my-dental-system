@@ -142,6 +142,7 @@ export default function AppointmentsPage() {
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
   const [queueVersion, setQueueVersion] = useState(0);
+  const [offlineItems, setOfflineItems] = useState<Appointment[]>([]);
 
   useEffect(() => {
     const handleQueueChange = () => setQueueVersion(v => v + 1);
@@ -153,9 +154,8 @@ export default function AppointmentsPage() {
     };
   }, []);
 
-  // Memoized calculations - must be called before any conditional logic
-  const mergedAppointments = useMemo(() => {
-    const offlineItems = getOfflineQueue()
+  useEffect(() => {
+    const items = getOfflineQueue()
       .filter((item) => item.type === 'appointment' && item.action === 'create')
       .map((item) => ({
         id: item.id as any,
@@ -168,8 +168,13 @@ export default function AppointmentsPage() {
         money: item.body.money,
         pending_sync: true,
       }));
+    setOfflineItems(items);
+  }, [queueVersion]);
+
+  // Memoized calculations - must be called before any conditional logic
+  const mergedAppointments = useMemo(() => {
     return [...offlineItems, ...appointments];
-  }, [appointments, queueVersion]);
+  }, [appointments, offlineItems]);
 
   const filteredAppointments = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
@@ -288,13 +293,49 @@ export default function AppointmentsPage() {
         return;
       }
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      let response;
+      try {
+        response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        addToOfflineQueue('appointment', editingAppointment ? 'update' : 'create', url, method, body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenDialog(false);
+        setEditingAppointment(null);
+        setFormData({
+          name: '',
+          gender: '',
+          phone: '',
+          age: '',
+          treatmentType: '',
+          appointmentDate: '',
+          money: '',
+        });
+        setSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue('appointment', editingAppointment ? 'update' : 'create', url, method, body);
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setOpenDialog(false);
+          setEditingAppointment(null);
+          setFormData({
+            name: '',
+            gender: '',
+            phone: '',
+            age: '',
+            treatmentType: '',
+            appointmentDate: '',
+            money: '',
+          });
+          setSubmitting(false);
+          return;
+        }
         throw new Error(editingAppointment ? 'وەک نەتوانیت نەخۆشی نوێبکەیتەوە' : 'وەک نەتوانیت نەخۆشی زیادبکە');
       }
 

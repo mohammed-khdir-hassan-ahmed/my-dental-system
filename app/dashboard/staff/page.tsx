@@ -31,6 +31,8 @@ import { useQueryState } from 'nuqs';
 import { useStaff, useMonthlyRecords, useAddStaff, useAddMonthlyRecord, useDeleteStaff, useUpdateStaff, useCloseMonth } from '@/hooks/useStaffQueries';
 import { notifyActionError, notifyMonthClosed } from '@/lib/notify';
 import { usePagination } from '@/hooks/usePagination';
+import { getOfflineQueue, addToOfflineQueue } from '@/lib/offline-sync';
+import { toast } from '@/lib/toast';
 import { Pagination } from '@/components/pagination';
 import {
   DashboardPageShell,
@@ -122,7 +124,7 @@ function StaffPageContent() {
   const [selectedStaffName, setSelectedStaffName] = useState('');
   const [deletingStaffName, setDeletingStaffName] = useState('');
   const [selectedAdvanceDetails, setSelectedAdvanceDetails] = useState<
-    Array<{ id: number; amount: string; date: string; note?: string }>
+    Array<{ id: number; amount: string; date: string; note?: string; pending_sync?: boolean }>
   >([]);
 
   // Form states
@@ -168,6 +170,67 @@ function StaffPageContent() {
   const updateStaffMutation = useUpdateStaff();
   const closeMonthMutation = useCloseMonth();
 
+  const [queueVersion, setQueueVersion] = useState(0);
+  const [offlineStaff, setOfflineStaff] = useState<any[]>([]);
+  const [offlineTransactions, setOfflineTransactions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const handleQueueChange = () => setQueueVersion(v => v + 1);
+    window.addEventListener('offline-queue-changed', handleQueueChange);
+    window.addEventListener('offline-sync-complete', () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      queryClient.invalidateQueries({ queryKey: ['monthly-records'] });
+    });
+    return () => {
+      window.removeEventListener('offline-queue-changed', handleQueueChange);
+      window.removeEventListener('offline-sync-complete', () => {
+        queryClient.invalidateQueries({ queryKey: ['staff'] });
+        queryClient.invalidateQueries({ queryKey: ['monthly-records'] });
+      });
+    };
+  }, [queryClient]);
+
+  useEffect(() => {
+    const staffItems = getOfflineQueue()
+      .filter((item) => item.type === 'staff' && item.action === 'create')
+      .map((item) => ({
+        id: item.id as any,
+        fullName: item.body.fullName,
+        role: item.body.role,
+        phonenumber: item.body.phonenumber,
+        basicSalary: item.body.basicSalary,
+        age: item.body.age,
+        address: item.body.address,
+        status: item.body.status,
+        pending_sync: true,
+      }));
+    setOfflineStaff(staffItems);
+
+    const transItems = getOfflineQueue()
+      .filter((item) => item.type === 'monthly-record' && item.action === 'create')
+      .map((item) => ({
+        id: item.id as any,
+        staffId: item.body.staffId,
+        amount: item.body.amount,
+        type: item.body.type,
+        date: item.body.date,
+        note: item.body.note,
+        monthKey: item.body.monthKey,
+        isPaid: false,
+        pending_sync: true,
+      }));
+    setOfflineTransactions(transItems);
+  }, [queueVersion]);
+
+  const mergedStaff = useMemo(() => {
+    return [...offlineStaff, ...staff];
+  }, [staff, offlineStaff]);
+
+  const mergedTransactions = useMemo(() => {
+    const filteredOffline = offlineTransactions.filter(t => t.monthKey === selectedMonthKey);
+    return [...filteredOffline, ...transactions];
+  }, [transactions, offlineTransactions, selectedMonthKey]);
+
   const refreshAvailableYears = useCallback(async () => {
     try {
       const res = await fetch('/api/payroll?getAvailableMonths=1', { cache: 'no-store' });
@@ -196,13 +259,13 @@ function StaffPageContent() {
 
   // Filtering and Pagination
   const filteredStaff = useMemo(() => {
-    return staff.filter(
+    return mergedStaff.filter(
       (s) =>
         s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.phonenumber.includes(searchTerm)
     );
-  }, [staff, searchTerm]);
+  }, [mergedStaff, searchTerm]);
 
   const {
     page,
@@ -223,8 +286,8 @@ function StaffPageContent() {
 
   // Calculate totals for a staff member
   const getStaffMonthlyAdvances = (staffId: number) => {
-    return transactions.filter((t) => {
-      if (t.staffId !== staffId || t.type !== 'Advance') return false;
+    return mergedTransactions.filter((t) => {
+      if (Number(t.staffId) !== Number(staffId) || t.type !== 'Advance') return false;
       return isViewingCurrentMonth ? !t.isPaid : true;
     });
   };
@@ -254,17 +317,52 @@ function StaffPageContent() {
       return;
     }
 
+    const data = {
+      fullName: staffFormData.fullName,
+      role: staffFormData.role,
+      phonenumber: staffFormData.phonenumber,
+      basicSalary: staffFormData.basicSalary,
+      status: staffFormData.status,
+      age: staffFormData.age ? parseInt(staffFormData.age) : undefined,
+      address: staffFormData.address,
+    };
+
     try {
       setSubmitting(true);
-      await addStaffMutation.mutateAsync({
-        fullName: staffFormData.fullName,
-        role: staffFormData.role,
-        phonenumber: staffFormData.phonenumber,
-        basicSalary: staffFormData.basicSalary,
-        status: staffFormData.status,
-        age: staffFormData.age ? parseInt(staffFormData.age) : undefined,
-        address: staffFormData.address,
-      });
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('staff', 'create', '/api/staff', 'POST', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddStaffDialog(false);
+        setStaffFormData({
+          fullName: '',
+          role: '',
+          phonenumber: '',
+          basicSalary: '',
+          age: '',
+          address: '',
+          status: 'Active',
+        });
+        return;
+      }
+
+      try {
+        await addStaffMutation.mutateAsync(data);
+      } catch (mutationErr) {
+        addToOfflineQueue('staff', 'create', '/api/staff', 'POST', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddStaffDialog(false);
+        setStaffFormData({
+          fullName: '',
+          role: '',
+          phonenumber: '',
+          basicSalary: '',
+          age: '',
+          address: '',
+          status: 'Active',
+        });
+        return;
+      }
 
       setOpenAddStaffDialog(false);
       setStaffFormData({
@@ -276,6 +374,9 @@ function StaffPageContent() {
         address: '',
         status: 'Active',
       });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'هەڵەیەک ڕویدا';
+      notifyActionError(message);
     } finally {
       setSubmitting(false);
     }
@@ -290,22 +391,51 @@ function StaffPageContent() {
       return;
     }
 
+    const selectedDate = new Date(`${advanceFormData.date}T12:00:00`);
+    if (Number.isNaN(selectedDate.getTime())) {
+      notifyActionError('تکایە بەروارێکی دروست بنووسە', 'بەرواری نادروست');
+      return;
+    }
+
+    const data = {
+      staffId: parseInt(advanceFormData.staffId),
+      amount: advanceFormData.amount,
+      type: 'Advance' as const,
+      date: selectedDate.toISOString(),
+      note: advanceFormData.note,
+      monthKey: getMonthKey(selectedDate),
+    };
+
     try {
       setSubmitting(true);
-      const selectedDate = new Date(`${advanceFormData.date}T12:00:00`);
-      if (Number.isNaN(selectedDate.getTime())) {
-        notifyActionError('تکایە بەروارێکی دروست بنووسە', 'بەرواری نادروست');
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('monthly-record', 'create', '/api/payroll', 'POST', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddAdvanceDialog(false);
+        setAdvanceFormData({
+          staffId: '',
+          amount: '',
+          date: getDateInputValue(),
+          note: '',
+        });
         return;
       }
 
-      await addTransactionMutation.mutateAsync({
-        staffId: parseInt(advanceFormData.staffId),
-        amount: advanceFormData.amount,
-        type: 'Advance',
-        date: selectedDate.toISOString(),
-        note: advanceFormData.note,
-        monthKey: getMonthKey(selectedDate),
-      });
+      try {
+        await addTransactionMutation.mutateAsync(data);
+      } catch (mutationErr) {
+        addToOfflineQueue('monthly-record', 'create', '/api/payroll', 'POST', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddAdvanceDialog(false);
+        setAdvanceFormData({
+          staffId: '',
+          amount: '',
+          date: getDateInputValue(),
+          note: '',
+        });
+        return;
+      }
 
       setOpenAddAdvanceDialog(false);
       setAdvanceFormData({
@@ -314,6 +444,9 @@ function StaffPageContent() {
         date: getDateInputValue(),
         note: '',
       });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'هەڵەیەک ڕویدا';
+      notifyActionError(message);
     } finally {
       setSubmitting(false);
     }
@@ -366,18 +499,55 @@ function StaffPageContent() {
       return;
     }
 
+    const data = {
+      id: editingStaffId,
+      fullName: editFormData.fullName,
+      role: editFormData.role,
+      phonenumber: editFormData.phonenumber,
+      basicSalary: editFormData.basicSalary,
+      age: editFormData.age ? parseInt(editFormData.age) : undefined,
+      address: editFormData.address,
+      status: editFormData.status,
+    };
+
     try {
       setSubmitting(true);
-      await updateStaffMutation.mutateAsync({
-        id: editingStaffId,
-        fullName: editFormData.fullName,
-        role: editFormData.role,
-        phonenumber: editFormData.phonenumber,
-        basicSalary: editFormData.basicSalary,
-        age: editFormData.age ? parseInt(editFormData.age) : undefined,
-        address: editFormData.address,
-        status: editFormData.status,
-      });
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('staff', 'update', '/api/staff', 'PUT', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenEditStaffDialog(false);
+        setEditingStaffId(null);
+        setEditFormData({
+          fullName: '',
+          role: '',
+          phonenumber: '',
+          basicSalary: '',
+          age: '',
+          address: '',
+          status: 'Active',
+        });
+        return;
+      }
+
+      try {
+        await updateStaffMutation.mutateAsync(data);
+      } catch (mutationErr) {
+        addToOfflineQueue('staff', 'update', '/api/staff', 'PUT', data);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenEditStaffDialog(false);
+        setEditingStaffId(null);
+        setEditFormData({
+          fullName: '',
+          role: '',
+          phonenumber: '',
+          basicSalary: '',
+          age: '',
+          address: '',
+          status: 'Active',
+        });
+        return;
+      }
 
       setOpenEditStaffDialog(false);
       setEditingStaffId(null);
@@ -390,6 +560,9 @@ function StaffPageContent() {
         address: '',
         status: 'Active',
       });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'هەڵەیەک ڕویدا';
+      notifyActionError(message);
     } finally {
       setSubmitting(false);
     }
@@ -436,19 +609,19 @@ function StaffPageContent() {
               </div>
             </div>
             <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">ژمارەی کارمەندەکان</p>
-            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{staff.length}</h3>
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">{mergedStaff.length}</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center gap-2">
                   <User className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{staff.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedStaff.length}</span>
               </div>
             </div>
           </div>
         </div>
-
+ 
         {/* Basic Salary Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
@@ -463,7 +636,7 @@ function StaffPageContent() {
             </div>
             <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">کۆی مووچەی بنەڕەتی</p>
             <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
-              {formatCurrency(staff.reduce((sum, s) => sum + parseFloat(s.basicSalary || '0'), 0))} IQD
+              {formatCurrency(mergedStaff.reduce((sum, s) => sum + parseFloat(s.basicSalary || '0'), 0))} IQD
             </h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
@@ -471,12 +644,12 @@ function StaffPageContent() {
                   <FileText className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{staff.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedStaff.length}</span>
               </div>
             </div>
           </div>
         </div>
-
+ 
         {/* Remaining Salary Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
@@ -491,7 +664,7 @@ function StaffPageContent() {
             </div>
             <p className="text-[11px] sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">بڕی موچەی ماوە</p>
             <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
-              {formatCurrency(staff.reduce((sum, s) => sum + (parseFloat(s.basicSalary || '0') - calculateStaffTotals(s.id)), 0))} IQD
+              {formatCurrency(mergedStaff.reduce((sum, s) => sum + (parseFloat(s.basicSalary || '0') - calculateStaffTotals(s.id)), 0))} IQD
             </h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
@@ -499,7 +672,7 @@ function StaffPageContent() {
                   <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">کارمەند</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{staff.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedStaff.length}</span>
               </div>
             </div>
           </div>
@@ -655,7 +828,15 @@ function StaffPageContent() {
                       } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                     >
                       <TableCell className={mobileTdPrimary}>
-                        {s.fullName}
+                        <div className="flex items-center gap-2">
+                          <span>{s.fullName}</span>
+                          {s.pending_sync && (
+                            <span className="inline-flex h-4 items-center justify-center rounded bg-amber-50 px-1.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200/40 shrink-0">
+                              <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-1" />
+                              لە چاوەڕوانیدا
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className={mobileTd}>{s.role}</TableCell>
                       <TableCell className={mobileTd}>
@@ -765,8 +946,13 @@ function StaffPageContent() {
                   className="rounded-lg border border-border/60 bg-muted/30 p-3"
                 >
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-red-700 dark:text-red-300">
+                    <span className="text-xs font-semibold text-red-700 dark:text-red-300 flex items-center gap-1.5">
                       {formatCurrency(item.amount)}
+                      {item.pending_sync && (
+                        <span className="inline-flex h-3.5 items-center justify-center rounded bg-amber-50 px-1 text-[8px] font-bold text-amber-600 border border-amber-200/40">
+                          لە چاوەڕوانیدا
+                        </span>
+                      )}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(item.date).toLocaleDateString('ku-IQ')}

@@ -9,6 +9,8 @@ import {
   notifyPdfExported,
   notifyPdfError,
 } from '@/lib/notify';
+import { getOfflineQueue, addToOfflineQueue } from '@/lib/offline-sync';
+import { toast } from '@/lib/toast';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -71,6 +73,7 @@ interface Installment {
   age?: string;
   phoneNumber?: string;
   address?: string;
+  pending_sync?: boolean;
 }
 
 interface FormData {
@@ -152,17 +155,79 @@ export default function InstallmentsPage() {
     paymentDate: new Date().toISOString().split('T')[0],
   });
 
+  const [queueVersion, setQueueVersion] = useState(0);
+  const [offlineInstallments, setOfflineInstallments] = useState<any[]>([]);
+
+  useEffect(() => {
+    const handleQueueChange = () => setQueueVersion(v => v + 1);
+    window.addEventListener('offline-queue-changed', handleQueueChange);
+    window.addEventListener('offline-sync-complete', fetchInstallments);
+    return () => {
+      window.removeEventListener('offline-queue-changed', handleQueueChange);
+      window.removeEventListener('offline-sync-complete', fetchInstallments);
+    };
+  }, []);
+
+  useEffect(() => {
+    const items = getOfflineQueue()
+      .filter((item) => item.type === 'installment' && item.url === '/api/installments')
+      .map((item) => ({
+        id: item.id as any,
+        patientName: item.body.patientName,
+        totalAmount: item.body.totalAmount.toString(),
+        paidAmount: item.body.paidAmount.toString(),
+        remainingAmount: item.body.remainingAmount.toString(),
+        installmentValue: item.body.installmentValue.toString(),
+        nextPaymentDate: item.body.nextPaymentDate,
+        status: 'Pending' as const,
+        createdAt: new Date().toISOString(),
+        age: item.body.age,
+        phoneNumber: item.body.phoneNumber,
+        address: item.body.address,
+        pending_sync: true,
+      }));
+    setOfflineInstallments(items);
+  }, [queueVersion]);
+
+  const mergedInstallments = useMemo(() => {
+    const baseList = [...offlineInstallments, ...installments];
+    const offlinePayments = getOfflineQueue()
+      .filter((item) => item.type === 'installment' && item.url === '/api/installments/record-payment');
+      
+    return baseList.map((inst) => {
+      const paymentsForThis = offlinePayments.filter(p => p.body.installmentId === inst.id);
+      if (paymentsForThis.length === 0) return inst;
+      
+      let extraPaid = 0;
+      paymentsForThis.forEach(p => {
+        extraPaid += parseFloat(p.body.amountPaid || '0');
+      });
+      
+      const newPaid = parseFloat(inst.paidAmount || '0') + extraPaid;
+      const newRemaining = Math.max(0, parseFloat(inst.totalAmount || '0') - newPaid);
+      const newStatus = newRemaining === 0 ? 'Paid' : inst.status;
+      
+      return {
+        ...inst,
+        paidAmount: newPaid.toString(),
+        remainingAmount: newRemaining.toString(),
+        status: newStatus,
+        pending_sync: true,
+      };
+    });
+  }, [installments, offlineInstallments, queueVersion]);
+
   // Memoized calculations - must be called before any conditional logic
   const filteredInstallments = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return installments.filter((installment) => {
+    return mergedInstallments.filter((installment) => {
       const matchesSearch = 
         installment.patientName.toLowerCase().includes(searchLower) ||
         installment.status.toLowerCase().includes(searchLower);
       const matchesStatus = statusFilter === 'all' || installment.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [installments, searchTerm, statusFilter]);
+  }, [mergedInstallments, searchTerm, statusFilter]);
 
   const totalPages = useMemo(() => Math.ceil(filteredInstallments.length / paginationPageSize) || 1, [filteredInstallments.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
@@ -210,23 +275,79 @@ export default function InstallmentsPage() {
       const remainingAmount = totalAmount - paidAmount;
       const installmentValue = parseFloat(formData.installmentValue);
 
-      const response = await fetch('/api/installments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientName: formData.patientName,
-          totalAmount,
-          paidAmount,
-          remainingAmount,
-          installmentValue,
-          nextPaymentDate: formData.nextPaymentDate || null,
-          age: formData.age,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-        }),
-      });
+      const body = {
+        patientName: formData.patientName,
+        totalAmount,
+        paidAmount,
+        remainingAmount,
+        installmentValue,
+        nextPaymentDate: formData.nextPaymentDate || null,
+        age: formData.age,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+      };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('installment', 'create', '/api/installments', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddDialog(false);
+        setFormData({
+          patientName: '',
+          totalAmount: '',
+          paidAmount: '0',
+          installmentValue: '',
+          nextPaymentDate: '',
+          age: '',
+          phoneNumber: '',
+          address: '',
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      let response;
+      try {
+        response = await fetch('/api/installments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        addToOfflineQueue('installment', 'create', '/api/installments', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenAddDialog(false);
+        setFormData({
+          patientName: '',
+          totalAmount: '',
+          paidAmount: '0',
+          installmentValue: '',
+          nextPaymentDate: '',
+          age: '',
+          phoneNumber: '',
+          address: '',
+        });
+        setSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue('installment', 'create', '/api/installments', 'POST', body);
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setOpenAddDialog(false);
+          setFormData({
+            patientName: '',
+            totalAmount: '',
+            paidAmount: '0',
+            installmentValue: '',
+            nextPaymentDate: '',
+            age: '',
+            phoneNumber: '',
+            address: '',
+          });
+          setSubmitting(false);
+          return;
+        }
         throw new Error('وەک نەتوانیت قیست زیادبکە');
       }
 
@@ -259,17 +380,58 @@ export default function InstallmentsPage() {
     setSubmitting(true);
 
     try {
-      const response = await fetch('/api/installments/record-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          installmentId: selectedInstallment.id,
-          amountPaid: paymentFormData.amountPaid,
-          paymentDate: paymentFormData.paymentDate,
-        }),
-      });
+      const body = {
+        installmentId: selectedInstallment.id,
+        amountPaid: paymentFormData.amountPaid,
+        paymentDate: paymentFormData.paymentDate,
+      };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('installment', 'update', '/api/installments/record-payment', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenPaymentDialog(false);
+        setPaymentFormData({
+          amountPaid: '',
+          paymentDate: new Date().toISOString().split('T')[0],
+        });
+        setSelectedInstallment(null);
+        setSubmitting(false);
+        return;
+      }
+
+      let response;
+      try {
+        response = await fetch('/api/installments/record-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        addToOfflineQueue('installment', 'update', '/api/installments/record-payment', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenPaymentDialog(false);
+        setPaymentFormData({
+          amountPaid: '',
+          paymentDate: new Date().toISOString().split('T')[0],
+        });
+        setSelectedInstallment(null);
+        setSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue('installment', 'update', '/api/installments/record-payment', 'POST', body);
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setOpenPaymentDialog(false);
+          setPaymentFormData({
+            amountPaid: '',
+            paymentDate: new Date().toISOString().split('T')[0],
+          });
+          setSelectedInstallment(null);
+          setSubmitting(false);
+          return;
+        }
         throw new Error('وەک نەتوانیت پارە تۆماربکە');
       }
 
@@ -540,13 +702,13 @@ export default function InstallmentsPage() {
   }
 
   // Calculate summary cards
-  const totalDebt = installments.reduce((sum, installment) => {
+  const totalDebt = mergedInstallments.reduce((sum, installment) => {
     return sum + parseFloat(installment.remainingAmount || '0');
   }, 0);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  const expectedThisMonth = installments.reduce((sum, installment) => {
+  const expectedThisMonth = mergedInstallments.reduce((sum, installment) => {
     if (installment.nextPaymentDate) {
       const paymentDate = new Date(installment.nextPaymentDate);
       if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
@@ -589,12 +751,12 @@ export default function InstallmentsPage() {
                   <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">نەخۆش</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{installments.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedInstallments.length}</span>
               </div>
             </div>
           </div>
         </div>
-
+ 
         {/* Expected This Month Card */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 rounded-2xl group-hover:opacity-100 transition duration-300" />
@@ -615,7 +777,7 @@ export default function InstallmentsPage() {
                   <Calendar className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">قیست</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{installments.filter(i => i.nextPaymentDate && new Date(i.nextPaymentDate).getMonth() === currentMonth && new Date(i.nextPaymentDate).getFullYear() === currentYear).length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedInstallments.filter(i => i.nextPaymentDate && new Date(i.nextPaymentDate).getMonth() === currentMonth && new Date(i.nextPaymentDate).getFullYear() === currentYear).length}</span>
               </div>
             </div>
           </div>
@@ -689,7 +851,17 @@ export default function InstallmentsPage() {
                       : 'bg-primary/2 dark:bg-slate-900/30'
                   } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                 >
-                  <TableCell className={mobileTdPrimary}>{installment.patientName}</TableCell>
+                  <TableCell className={mobileTdPrimary}>
+                    <div className="flex items-center gap-2">
+                      <span>{installment.patientName}</span>
+                      {installment.pending_sync && (
+                        <span className="inline-flex h-4 items-center justify-center rounded bg-amber-50 px-1.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200/40 shrink-0">
+                          <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-1" />
+                          لە چاوەڕوانیدا
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className={mobileTd}>{installment.age || '-'}</TableCell>
                   <TableCell className={mobileTd}>{installment.phoneNumber || '-'}</TableCell>
                   <TableCell className={mobileTd}>{installment.address || '-'}</TableCell>

@@ -2,7 +2,7 @@ import { toast } from '@/lib/toast';
 
 export interface OfflineQueueItem {
   id: string;
-  type: 'appointment' | 'expense' | 'sale';
+  type: 'appointment' | 'expense' | 'sale' | 'staff' | 'monthly-record' | 'installment';
   action: 'create' | 'update';
   url: string;
   method: string;
@@ -34,7 +34,7 @@ export function saveOfflineQueue(queue: OfflineQueueItem[]) {
 }
 
 export function addToOfflineQueue(
-  type: 'appointment' | 'expense' | 'sale',
+  type: 'appointment' | 'expense' | 'sale' | 'staff' | 'monthly-record' | 'installment',
   action: 'create' | 'update',
   url: string,
   method: string,

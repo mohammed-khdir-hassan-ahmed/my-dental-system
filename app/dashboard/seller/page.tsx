@@ -129,6 +129,7 @@ export default function SellerPage() {
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
   const [queueVersion, setQueueVersion] = useState(0);
+  const [offlineItems, setOfflineItems] = useState<any[]>([]);
 
   useEffect(() => {
     const handleQueueChange = () => setQueueVersion(v => v + 1);
@@ -156,9 +157,8 @@ export default function SellerPage() {
     notes: '',
   });
 
-  // Memoized calculations - must be called before any conditional logic
-  const mergedSales = useMemo(() => {
-    const offlineItems = getOfflineQueue()
+  useEffect(() => {
+    const items = getOfflineQueue()
       .filter((item) => item.type === 'sale' && item.action === 'create')
       .map((item) => ({
         id: item.id as any,
@@ -173,8 +173,13 @@ export default function SellerPage() {
         notes: item.body.notes,
         pending_sync: true,
       }));
+    setOfflineItems(items);
+  }, [queueVersion]);
+
+  // Memoized calculations - must be called before any conditional logic
+  const mergedSales = useMemo(() => {
     return [...offlineItems, ...sales];
-  }, [sales, queueVersion]);
+  }, [sales, offlineItems]);
 
   const totalPages = useMemo(() => Math.ceil(mergedSales.length / paginationPageSize) || 1, [mergedSales.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
@@ -333,21 +338,46 @@ export default function SellerPage() {
       }
 
       let response;
-      if (editingSale) {
-        response = await fetch(`/api/sales`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...saleData, id: editingSale.id }),
-        });
-      } else {
-        response = await fetch('/api/sales', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(saleData),
-        });
+      try {
+        if (editingSale) {
+          response = await fetch(`/api/sales`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...saleData, id: editingSale.id }),
+          });
+        } else {
+          response = await fetch('/api/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(saleData),
+          });
+        }
+      } catch (fetchErr) {
+        addToOfflineQueue(
+          'sale',
+          editingSale ? 'update' : 'create',
+          editingSale ? `/api/sales` : '/api/sales',
+          editingSale ? 'PUT' : 'POST',
+          editingSale ? { ...saleData, id: editingSale.id } : saleData
+        );
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setIsFormOpen(false);
+        return;
       }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue(
+            'sale',
+            editingSale ? 'update' : 'create',
+            editingSale ? `/api/sales` : '/api/sales',
+            editingSale ? 'PUT' : 'POST',
+            editingSale ? { ...saleData, id: editingSale.id } : saleData
+          );
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setIsFormOpen(false);
+          return;
+        }
         throw new Error('هەڵە لە تۆمارکردنی فرۆشتن');
       }
 

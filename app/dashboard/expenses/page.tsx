@@ -225,6 +225,7 @@ export default function ExpensesPage() {
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
   const [queueVersion, setQueueVersion] = useState(0);
+  const [offlineItems, setOfflineItems] = useState<any[]>([]);
 
   useEffect(() => {
     const handleQueueChange = () => setQueueVersion(v => v + 1);
@@ -253,9 +254,8 @@ export default function ExpensesPage() {
   const [addForm, setAddForm] = useState<ExpenseFormData>(defaultForm);
   const [editForm, setEditForm] = useState<ExpenseFormData>(defaultForm);
 
-  // Memoized calculations - must be called before any conditional logic
-  const mergedExpenses = useMemo(() => {
-    const offlineItems = getOfflineQueue()
+  useEffect(() => {
+    const items = getOfflineQueue()
       .filter((item) => item.type === 'expense' && item.action === 'create')
       .map((item) => ({
         id: item.id,
@@ -267,8 +267,13 @@ export default function ExpensesPage() {
         notes: item.body.notes,
         pending_sync: true,
       }));
+    setOfflineItems(items);
+  }, [queueVersion]);
+
+  // Memoized calculations - must be called before any conditional logic
+  const mergedExpenses = useMemo(() => {
     return [...offlineItems, ...expenses];
-  }, [expenses, queueVersion]);
+  }, [expenses, offlineItems]);
 
   const totalPages = useMemo(() => Math.ceil(mergedExpenses.length / paginationPageSize) || 1, [mergedExpenses.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
@@ -384,15 +389,33 @@ export default function ExpensesPage() {
         return;
       }
 
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+      let response;
+      try {
+        response = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        addToOfflineQueue('expense', 'create', '/api/expenses', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setAddOpen(false);
+        resetAddForm();
+        setSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue('expense', 'create', '/api/expenses', 'POST', body);
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setAddOpen(false);
+          resetAddForm();
+          setSubmitting(false);
+          return;
+        }
         const payload = (await response.json()) as { error?: string };
         throw new Error(payload.error || 'تۆمارکردنی خەرجی سەرکەوتوو نەبوو');
       }
@@ -431,23 +454,52 @@ export default function ExpensesPage() {
       setSubmitting(true);
       setError(null);
 
-      const response = await fetch('/api/expenses', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: selectedExpense.id,
-          title: editForm.title,
-          category: editForm.category,
-          amount: Number(editForm.amount),
-          date: editForm.date,
-          paymentMethod: editForm.paymentMethod,
-          notes: editForm.notes,
-        }),
-      });
+      const body = {
+        id: selectedExpense.id,
+        title: editForm.title,
+        category: editForm.category,
+        amount: Number(editForm.amount),
+        date: editForm.date,
+        paymentMethod: editForm.paymentMethod,
+        notes: editForm.notes,
+      };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('expense', 'update', '/api/expenses', 'PATCH', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setEditOpen(false);
+        setSelectedExpense(null);
+        setSubmitting(false);
+        return;
+      }
+
+      let response;
+      try {
+        response = await fetch('/api/expenses', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        addToOfflineQueue('expense', 'update', '/api/expenses', 'PATCH', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setEditOpen(false);
+        setSelectedExpense(null);
+        setSubmitting(false);
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          addToOfflineQueue('expense', 'update', '/api/expenses', 'PATCH', body);
+          toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+          setEditOpen(false);
+          setSelectedExpense(null);
+          setSubmitting(false);
+          return;
+        }
         const payload = (await response.json()) as { error?: string };
         throw new Error(payload.error || 'نوێکردنەوەی خەرجی سەرکەوتوو نەبوو');
       }
