@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     const { name, gender, phone, age, treatmentType, appointmentDate, money } =
       await request.json();
 
-    if (!name || !gender || !phone || !age || !treatmentType || !appointmentDate) {
+    if (!name || !gender || !age || !treatmentType || !appointmentDate) {
       return NextResponse.json(
         { message: 'هەموو زانیاریەکان پێویسن' },
         { status: 400 }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       .values({
         name,
         gender,
-        phone,
+        phone: phone || '',
         age,
         treatmentType,
         appointmentDate,
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (!name || !gender || !phone || !age || !treatmentType || !appointmentDate) {
+    if (!name || !gender || !age || !treatmentType || !appointmentDate) {
       return NextResponse.json(
         { message: 'هەموو زانیاریەکان پێویسن' },
         { status: 400 }
@@ -153,7 +153,7 @@ export async function PUT(request: NextRequest) {
       .set({
         name,
         gender,
-        phone,
+        phone: phone || '',
         age,
         treatmentType,
         appointmentDate,

@@ -145,7 +145,7 @@ export default function AppointmentsPage() {
     return appointments.filter((appointment) => {
       return (
         appointment.name.toLowerCase().includes(searchLower) ||
-        appointment.phone.toLowerCase().includes(searchLower) ||
+        (appointment.phone || '').toLowerCase().includes(searchLower) ||
         appointment.gender.toLowerCase().includes(searchLower) ||
         appointment.treatmentType.toLowerCase().includes(searchLower)
       );
@@ -534,7 +534,7 @@ export default function AppointmentsPage() {
                 >
                   <TableCell className={mobileTdPrimary}>{appointment.name}</TableCell>
                   <TableCell className={mobileTd}>{appointment.gender}</TableCell>
-                  <TableCell className={mobileTd}>{appointment.phone}</TableCell>
+                  <TableCell className={mobileTd}>{appointment.phone || '-'}</TableCell>
                   <TableCell className={mobileTd}>{appointment.age}</TableCell>
                   <TableCell className={`${mobileTd} max-w-[90px] sm:max-w-none truncate`}>{appointment.treatmentType}</TableCell>
                   <TableCell className={mobileTd}>
@@ -668,14 +668,16 @@ export default function AppointmentsPage() {
               </div>
 
               <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەلەفۆن</label>
+                <div className="flex items-center gap-1 sm:col-span-1">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">تەلەفۆن</label>
+                  <span className="text-[10px] text-muted-foreground">(ئارەزوومەندانە)</span>
+                </div>
                 <Input
                   className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="07701234567"
-                  required
                 />
               </div>
 
