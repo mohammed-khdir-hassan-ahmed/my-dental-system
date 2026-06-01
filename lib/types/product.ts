@@ -24,6 +24,7 @@ export interface Sale {
   date: string;
   notes?: string;
   createdAt?: string;
+  pending_sync?: boolean;
 }
 
 export const defaultCategories: ProductCategory[] = ['فڵچەی ددان', 'مەعجونی ددان'];

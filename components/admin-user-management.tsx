@@ -289,7 +289,7 @@ export function AdminUserManagement() {
                     className="h-8 flex-1 rounded-lg text-xs sm:h-9 sm:flex-none sm:text-sm"
                   >
                     <Pencil className="size-3.5 sm:mr-1" />
-                    <span>دەستکاری</span>
+                    <span>گۆڕانکاری</span>
                   </Button>
                   <Button
                     variant="outline"

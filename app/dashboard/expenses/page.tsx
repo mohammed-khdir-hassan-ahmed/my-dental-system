@@ -11,6 +11,8 @@ import {
   notifyPdfExported,
   notifyPdfError,
 } from '@/lib/notify';
+import { getOfflineQueue, addToOfflineQueue } from '@/lib/offline-sync';
+import { toast } from '@/lib/toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -222,6 +224,17 @@ export default function ExpensesPage() {
   const [customEndDate, setCustomEndDate] = useState('');
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
+  const [queueVersion, setQueueVersion] = useState(0);
+
+  useEffect(() => {
+    const handleQueueChange = () => setQueueVersion(v => v + 1);
+    window.addEventListener('offline-queue-changed', handleQueueChange);
+    window.addEventListener('offline-sync-complete', () => fetchExpenses(searchTerm));
+    return () => {
+      window.removeEventListener('offline-queue-changed', handleQueueChange);
+      window.removeEventListener('offline-sync-complete', () => fetchExpenses(searchTerm));
+    };
+  }, [searchTerm]);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -241,17 +254,33 @@ export default function ExpensesPage() {
   const [editForm, setEditForm] = useState<ExpenseFormData>(defaultForm);
 
   // Memoized calculations - must be called before any conditional logic
-  const totalPages = useMemo(() => Math.ceil(expenses.length / paginationPageSize) || 1, [expenses.length, paginationPageSize]);
+  const mergedExpenses = useMemo(() => {
+    const offlineItems = getOfflineQueue()
+      .filter((item) => item.type === 'expense' && item.action === 'create')
+      .map((item) => ({
+        id: item.id,
+        title: item.body.title,
+        category: item.body.category,
+        amount: item.body.amount.toString(),
+        date: item.body.date,
+        paymentMethod: item.body.paymentMethod,
+        notes: item.body.notes,
+        pending_sync: true,
+      }));
+    return [...offlineItems, ...expenses];
+  }, [expenses, queueVersion]);
+
+  const totalPages = useMemo(() => Math.ceil(mergedExpenses.length / paginationPageSize) || 1, [mergedExpenses.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
   const endIndex = useMemo(() => startIndex + paginationPageSize, [startIndex, paginationPageSize]);
 
   const paginatedExpenses = useMemo(() => {
-    return expenses.slice(startIndex, endIndex);
-  }, [expenses, startIndex, endIndex]);
+    return mergedExpenses.slice(startIndex, endIndex);
+  }, [mergedExpenses, startIndex, endIndex]);
 
   const monthlyTotal = useMemo(
-    () => expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0),
-    [expenses]
+    () => mergedExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+    [mergedExpenses]
   );
 
   const handlePageChange = (newPage: number) => {
@@ -337,19 +366,30 @@ export default function ExpensesPage() {
       setSubmitting(true);
       setError(null);
 
+      const body = {
+        title: addForm.title,
+        category: addForm.category,
+        amount: Number(addForm.amount),
+        date: addForm.date,
+        paymentMethod: addForm.paymentMethod,
+        notes: addForm.notes,
+      };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('expense', 'create', '/api/expenses', 'POST', body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setAddOpen(false);
+        resetAddForm();
+        setSubmitting(false);
+        return;
+      }
+
       const response = await fetch('/api/expenses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: addForm.title,
-          category: addForm.category,
-          amount: Number(addForm.amount),
-          date: addForm.date,
-          paymentMethod: addForm.paymentMethod,
-          notes: addForm.notes,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -677,7 +717,7 @@ export default function ExpensesPage() {
                   <Wallet className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">خەرجی</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{expenses.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedExpenses.length}</span>
               </div>
             </div>
           </div>
@@ -703,7 +743,7 @@ export default function ExpensesPage() {
                   <AlertCircle className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">خەرجی</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{expenses.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedExpenses.length}</span>
               </div>
             </div>
           </div>
@@ -780,7 +820,17 @@ export default function ExpensesPage() {
                         : 'bg-primary/2 dark:bg-slate-900/30'
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className={mobileTdPrimary}>{expense.title}</TableCell>
+                    <TableCell className={mobileTdPrimary}>
+                      <div className="flex items-center gap-2">
+                        <span>{expense.title}</span>
+                        {expense.pending_sync && (
+                          <span className="inline-flex h-4 items-center justify-center rounded bg-amber-50 px-1.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200/40 shrink-0">
+                            <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-1" />
+                            لە چاوەڕوانیدا
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className={mobileTd}>{expense.category}</TableCell>
                     <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/40 dark:text-red-300">

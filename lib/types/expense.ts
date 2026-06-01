@@ -20,4 +20,5 @@ export interface Expense {
   paymentMethod: PaymentMethod;
   notes: string | null;
   createdAt?: string | null;
+  pending_sync?: boolean;
 }

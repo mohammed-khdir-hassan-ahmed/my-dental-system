@@ -11,6 +11,8 @@ import {
   notifyPdfExported,
   notifyPdfError,
 } from '@/lib/notify';
+import { getOfflineQueue, addToOfflineQueue } from '@/lib/offline-sync';
+import { toast } from '@/lib/toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -126,6 +128,17 @@ export default function SellerPage() {
   const [customEndDate, setCustomEndDate] = useState('');
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
+  const [queueVersion, setQueueVersion] = useState(0);
+
+  useEffect(() => {
+    const handleQueueChange = () => setQueueVersion(v => v + 1);
+    window.addEventListener('offline-queue-changed', handleQueueChange);
+    window.addEventListener('offline-sync-complete', () => fetchSales(searchQuery));
+    return () => {
+      window.removeEventListener('offline-queue-changed', handleQueueChange);
+      window.removeEventListener('offline-sync-complete', () => fetchSales(searchQuery));
+    };
+  }, [searchQuery]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -144,13 +157,32 @@ export default function SellerPage() {
   });
 
   // Memoized calculations - must be called before any conditional logic
-  const totalPages = useMemo(() => Math.ceil(sales.length / paginationPageSize) || 1, [sales.length, paginationPageSize]);
+  const mergedSales = useMemo(() => {
+    const offlineItems = getOfflineQueue()
+      .filter((item) => item.type === 'sale' && item.action === 'create')
+      .map((item) => ({
+        id: item.id as any,
+        productId: 0,
+        productName: item.body.productName,
+        category: item.body.category,
+        price: item.body.price,
+        quantity: item.body.quantity,
+        totalPrice: item.body.price * item.body.quantity,
+        profit: item.body.price * item.body.quantity,
+        date: item.body.date,
+        notes: item.body.notes,
+        pending_sync: true,
+      }));
+    return [...offlineItems, ...sales];
+  }, [sales, queueVersion]);
+
+  const totalPages = useMemo(() => Math.ceil(mergedSales.length / paginationPageSize) || 1, [mergedSales.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
   const endIndex = useMemo(() => startIndex + paginationPageSize, [startIndex, paginationPageSize]);
 
   const paginatedSales = useMemo(() => {
-    return sales.slice(startIndex, endIndex);
-  }, [sales, startIndex, endIndex]);
+    return mergedSales.slice(startIndex, endIndex);
+  }, [mergedSales, startIndex, endIndex]);
 
   const handlePageChange = (newPage: number) => {
     setPaginationPage(newPage);
@@ -200,29 +232,29 @@ export default function SellerPage() {
   // Calculate profits
   const todayProfit = useMemo(() => {
     const today = getToday();
-    return sales
+    return mergedSales
       .filter(s => s.date === today)
       .reduce((sum, s) => sum + Number(s.profit), 0);
-  }, [sales]);
+  }, [mergedSales]);
 
   const yesterdayProfit = useMemo(() => {
     const yesterday = getYesterday();
-    return sales
+    return mergedSales
       .filter(s => s.date === yesterday)
       .reduce((sum, s) => sum + Number(s.profit), 0);
-  }, [sales]);
+  }, [mergedSales]);
 
   const lastMonthProfit = useMemo(() => {
     const start = getLastMonthStart();
     const end = getLastMonthEnd();
-    return sales
+    return mergedSales
       .filter(s => s.date >= start && s.date <= end)
       .reduce((sum, s) => sum + Number(s.profit), 0);
-  }, [sales]);
+  }, [mergedSales]);
 
   const totalProfit = useMemo(() => {
-    return sales.reduce((sum, s) => sum + Number(s.profit), 0);
-  }, [sales]);
+    return mergedSales.reduce((sum, s) => sum + Number(s.profit), 0);
+  }, [mergedSales]);
 
   // Handlers
   const handleOpenForm = (sale?: Sale) => {
@@ -286,6 +318,19 @@ export default function SellerPage() {
         date: formData.date,
         notes: formData.notes.trim(),
       };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue(
+          'sale',
+          editingSale ? 'update' : 'create',
+          editingSale ? `/api/sales` : '/api/sales',
+          editingSale ? 'PUT' : 'POST',
+          editingSale ? { ...saleData, id: editingSale.id } : saleData
+        );
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setIsFormOpen(false);
+        return;
+      }
 
       let response;
       if (editingSale) {
@@ -401,7 +446,7 @@ export default function SellerPage() {
                   <TrendingUp className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">فرۆشتن</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{sales.filter(s => s.date === getToday()).length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedSales.filter(s => s.date === getToday()).length}</span>
               </div>
             </div>
           </div>
@@ -427,7 +472,7 @@ export default function SellerPage() {
                   <Package className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span className="text-xs text-slate-600 dark:text-slate-400">فرۆشتن</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{sales.length}</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{mergedSales.length}</span>
               </div>
             </div>
           </div>
@@ -504,7 +549,17 @@ export default function SellerPage() {
                         : 'bg-primary/2 dark:bg-slate-900/30'
                     } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                   >
-                    <TableCell className={mobileTdPrimary}>{sale.productName}</TableCell>
+                    <TableCell className={mobileTdPrimary}>
+                      <div className="flex items-center gap-2">
+                        <span>{sale.productName}</span>
+                        {sale.pending_sync && (
+                          <span className="inline-flex h-4 items-center justify-center rounded bg-amber-50 px-1.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200/40 shrink-0">
+                            <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-1" />
+                            لە چاوەڕوانیدا
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className={mobileTd}>
                       <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                         {sale.category}

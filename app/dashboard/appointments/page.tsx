@@ -9,6 +9,8 @@ import {
 } from '@/lib/notify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getOfflineQueue, addToOfflineQueue } from '@/lib/offline-sync';
+import { toast } from '@/lib/toast';
 import {
   Table,
   TableBody,
@@ -59,6 +61,7 @@ interface Appointment {
   treatmentType: string;
   appointmentDate: string;
   money?: string | number;
+  pending_sync?: boolean;
 }
 
 interface FormData {
@@ -138,11 +141,39 @@ export default function AppointmentsPage() {
 
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
+  const [queueVersion, setQueueVersion] = useState(0);
+
+  useEffect(() => {
+    const handleQueueChange = () => setQueueVersion(v => v + 1);
+    window.addEventListener('offline-queue-changed', handleQueueChange);
+    window.addEventListener('offline-sync-complete', fetchAppointments);
+    return () => {
+      window.removeEventListener('offline-queue-changed', handleQueueChange);
+      window.removeEventListener('offline-sync-complete', fetchAppointments);
+    };
+  }, []);
 
   // Memoized calculations - must be called before any conditional logic
+  const mergedAppointments = useMemo(() => {
+    const offlineItems = getOfflineQueue()
+      .filter((item) => item.type === 'appointment' && item.action === 'create')
+      .map((item) => ({
+        id: item.id as any,
+        name: item.body.name,
+        gender: item.body.gender,
+        phone: item.body.phone,
+        age: item.body.age,
+        treatmentType: item.body.treatmentType,
+        appointmentDate: item.body.appointmentDate,
+        money: item.body.money,
+        pending_sync: true,
+      }));
+    return [...offlineItems, ...appointments];
+  }, [appointments, queueVersion]);
+
   const filteredAppointments = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return appointments.filter((appointment) => {
+    return mergedAppointments.filter((appointment) => {
       return (
         appointment.name.toLowerCase().includes(searchLower) ||
         (appointment.phone || '').toLowerCase().includes(searchLower) ||
@@ -150,7 +181,7 @@ export default function AppointmentsPage() {
         appointment.treatmentType.toLowerCase().includes(searchLower)
       );
     });
-  }, [appointments, searchTerm]);
+  }, [mergedAppointments, searchTerm]);
 
   const totalPages = useMemo(() => Math.ceil(filteredAppointments.length / paginationPageSize) || 1, [filteredAppointments.length, paginationPageSize]);
   const startIndex = useMemo(() => (paginationPage - 1) * paginationPageSize, [paginationPage, paginationPageSize]);
@@ -161,7 +192,7 @@ export default function AppointmentsPage() {
   }, [filteredAppointments, startIndex, endIndex]);
 
   const treatmentStats = useMemo(() => {
-    return appointments.reduce((acc, appointment) => {
+    return mergedAppointments.reduce((acc, appointment) => {
       const existing = acc.find(item => item.treatmentType === appointment.treatmentType);
       if (existing) {
         existing.count += 1;
@@ -175,13 +206,13 @@ export default function AppointmentsPage() {
       }
       return acc;
     }, [] as Array<{ treatmentType: string; count: number; totalMoney: number }>);
-  }, [appointments]);
+  }, [mergedAppointments]);
 
   const totalMoney = useMemo(() => {
-    return appointments.reduce((sum, appointment) => {
+    return mergedAppointments.reduce((sum, appointment) => {
       return sum + parseFloat(String(appointment.money || 0));
     }, 0);
-  }, [appointments]);
+  }, [mergedAppointments]);
 
   const fetchAppointments = async () => {
     try {
@@ -238,6 +269,24 @@ export default function AppointmentsPage() {
             age: parseInt(formData.age),
             money: formData.money ? parseFloat(formData.money) : 0,
           };
+
+      if (!navigator.onLine) {
+        addToOfflineQueue('appointment', editingAppointment ? 'update' : 'create', url, method, body);
+        toast.success("داتاکان بە شێوازی ئۆفلایین پاشکەوت کران");
+        setOpenDialog(false);
+        setEditingAppointment(null);
+        setFormData({
+          name: '',
+          gender: '',
+          phone: '',
+          age: '',
+          treatmentType: '',
+          appointmentDate: '',
+          money: '',
+        });
+        setSubmitting(false);
+        return;
+      }
 
       const response = await fetch(url, {
         method,
@@ -390,7 +439,7 @@ export default function AppointmentsPage() {
                     <Calendar className="size-3 sm:size-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
                     <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 truncate">دانیشتەکان</span>
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{appointments.length}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{mergedAppointments.length}</span>
                 </div>
               </div>
             </div>
@@ -504,7 +553,7 @@ export default function AppointmentsPage() {
             <TableRow className="hover:bg-primary/2 transition-colors">
               <TableHead className={mobileTh}>ناوی نەخۆش</TableHead>
               <TableHead className={mobileTh}>ڕەگەز</TableHead>
-              <TableHead className={mobileTh}>تەلەفۆن</TableHead>
+              <TableHead className={mobileTh}>ژ.تەلەفۆن</TableHead>
               <TableHead className={mobileTh}>تەمەن</TableHead>
               <TableHead className={mobileTh}>جۆری چارەسەری</TableHead>
               <TableHead className={mobileTh}>بەروار</TableHead>
@@ -532,7 +581,17 @@ export default function AppointmentsPage() {
                       : 'bg-primary/2 dark:bg-slate-900/30'
                   } hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors`}
                 >
-                  <TableCell className={mobileTdPrimary}>{appointment.name}</TableCell>
+                  <TableCell className={mobileTdPrimary}>
+                    <div className="flex items-center gap-2">
+                      <span>{appointment.name}</span>
+                      {appointment.pending_sync && (
+                        <span className="inline-flex h-4 items-center justify-center rounded bg-amber-50 px-1.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200/40 shrink-0">
+                          <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-1" />
+                          لە چاوەڕوانیدا
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className={mobileTd}>{appointment.gender}</TableCell>
                   <TableCell className={mobileTd}>{appointment.phone || '-'}</TableCell>
                   <TableCell className={mobileTd}>{appointment.age}</TableCell>
@@ -669,7 +728,7 @@ export default function AppointmentsPage() {
 
               <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
                 <div className="flex items-center gap-1 sm:col-span-1">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">تەلەفۆن</label>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">ژ.تەلەفۆن</label>
                   <span className="text-[10px] text-muted-foreground">(ئارەزوومەندانە)</span>
                 </div>
                 <Input
