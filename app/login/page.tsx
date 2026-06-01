@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import Image from 'next/image';
 import { notifyLoginSuccess, notifyLoginError } from '@/lib/notify';
 import { markShowDashboardWelcome } from '@/lib/login-welcome';
@@ -14,6 +14,7 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -94,15 +95,25 @@ export default function Login() {
 
                         <div className='space-y-2'>
                             <label className='block text-sm font-semibold text-gray-700'>وشەی نهێنی</label>
-                            <Input 
-                                type='password' 
-                                placeholder='وشەی نهێنیت بنووسە'
-                                className='w-full text-base h-12 px-4 border-2 border-gray-200 text-black rounded-lg transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none placeholder-gray-400'
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                title='تکایە وشەی نهێنی بنووسە'
-                            />
+                            <div className='relative'>
+                                <Input 
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder='وشەی نهێنیت بنووسە'
+                                    className='w-full text-base h-12 px-4 border-2 border-gray-200 text-black rounded-lg transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none placeholder-gray-400'
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    title='تکایە وشەی نهێنی بنووسە'
+                                />
+                                <button
+                                    type='button'
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors duration-200 focus:outline-none'
+                                    title={showPassword ? 'شاردنەوەی وشەی نهێنی' : 'پیشاندانی وشەی نهێنی'}
+                                >
+                                    {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                                </button>
+                            </div>
                         </div>
 
                         <Button 
