@@ -33,7 +33,7 @@ const navMain = [
     icon: <LayoutDashboardIcon />,
   },
   {
-    title: "سەرەبڕین ",
+    title: "نۆرەگرتن ",
     url: "/dashboard/appointments",
     icon: <CalendarIcon />,
   },
@@ -66,7 +66,7 @@ const navMain = [
       { title: " کارمەندەکان", url: "/dashboard/reports?type=employees" },
       { title: " قیستەکان", url: "/dashboard/reports?type=installments" },
       { title: " فرۆشتن", url: "/dashboard/reports?type=sales" },
-      { title: " سەرەبڕین", url: "/dashboard/reports?type=appointments" },
+      { title: " نۆرەگرتن", url: "/dashboard/reports?type=appointments" },
     ],
   },
   {

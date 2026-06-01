@@ -11,7 +11,7 @@ import { syncOfflineQueue } from "@/lib/offline-sync"
 
 const pageNames: Record<string, string> = {
   '/dashboard': 'داشبۆرد',
-  '/dashboard/appointments': 'سەرەبڕین',
+  '/dashboard/appointments': 'نۆرەگرتن',
   '/dashboard/patients': ' بەشی فرۆشتن',
   '/dashboard/patients/new': 'تۆمارکردنی نەخۆشی نوێ',
   '/dashboard/dental-map': 'نەخشەی ددان و چارەسەر',
