@@ -5,12 +5,15 @@ import {
   installmentsTable,
   appointmentsTable,
   staffTable,
-  payrollRecordsTable,
+  monthlyRecordsTable,
+  payrollHistoryTable,
+  transactionsTable,
   salesTable,
   paymentHistoryTable,
   usersTable,
   adminNotificationsTable,
   pushSubscriptionsTable,
+  advanceRequestsTable,
 } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +26,10 @@ export async function GET(request: NextRequest) {
       installments,
       appointments,
       staff,
-      payrollRecords,
+      monthlyRecords,
+      payrollHistory,
+      transactions,
+      advanceRequests,
       sales,
       paymentHistory,
       users,
@@ -34,7 +40,10 @@ export async function GET(request: NextRequest) {
       db.select().from(installmentsTable),
       db.select().from(appointmentsTable),
       db.select().from(staffTable),
-      db.select().from(payrollRecordsTable),
+      db.select().from(monthlyRecordsTable),
+      db.select().from(payrollHistoryTable),
+      db.select().from(transactionsTable),
+      db.select().from(advanceRequestsTable),
       db.select().from(salesTable),
       db.select().from(paymentHistoryTable),
       db.select().from(usersTable),
@@ -50,7 +59,10 @@ export async function GET(request: NextRequest) {
         installments,
         appointments,
         staff,
-        payrollRecords,
+        monthlyRecords,
+        payrollHistory,
+        transactions,
+        advanceRequests,
         sales,
         paymentHistory,
         users,
@@ -164,12 +176,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (data.payrollRecords?.length > 0) {
-      for (const record of data.payrollRecords) {
+    if (data.monthlyRecords?.length > 0) {
+      for (const record of data.monthlyRecords) {
         try {
-          await db.insert(payrollRecordsTable).values(record).onConflictDoNothing();
+          await db.insert(monthlyRecordsTable).values(record).onConflictDoNothing();
         } catch (e) {
-          console.warn('Skipping payroll record:', record.id, e);
+          console.warn('Skipping monthly record:', record.id, e);
+        }
+      }
+    }
+
+    if (data.payrollHistory?.length > 0) {
+      for (const record of data.payrollHistory) {
+        try {
+          await db.insert(payrollHistoryTable).values(record).onConflictDoNothing();
+        } catch (e) {
+          console.warn('Skipping payroll history:', record.id, e);
+        }
+      }
+    }
+
+    if (data.transactions?.length > 0) {
+      for (const record of data.transactions) {
+        try {
+          await db.insert(transactionsTable).values(record).onConflictDoNothing();
+        } catch (e) {
+          console.warn('Skipping transaction:', record.id, e);
+        }
+      }
+    }
+
+    if (data.advanceRequests?.length > 0) {
+      for (const request of data.advanceRequests) {
+        try {
+          await db.insert(advanceRequestsTable).values(request).onConflictDoNothing();
+        } catch (e) {
+          console.warn('Skipping advance request:', request.id, e);
         }
       }
     }
