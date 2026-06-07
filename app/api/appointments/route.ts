@@ -88,7 +88,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, gender, phone, age, treatmentType, appointmentDate, money } =
+    const { name, gender, phone, age, treatmentType, appointmentDate, money, teethData } =
       await request.json();
 
     if (!name || !gender || !age || !treatmentType || !appointmentDate) {
@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
         treatmentType,
         appointmentDate,
         money: money ? money.toString() : '0',
+        teethData: teethData ? JSON.stringify(teethData) : null,
       })
       .returning();
 
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, name, gender, phone, age, treatmentType, appointmentDate, money } =
+    const { id, name, gender, phone, age, treatmentType, appointmentDate, money, teethData } =
       await request.json();
 
     if (!id) {
@@ -158,6 +159,7 @@ export async function PUT(request: NextRequest) {
         treatmentType,
         appointmentDate,
         money: money ? money.toString() : '0',
+        teethData: teethData ? JSON.stringify(teethData) : null,
       })
       .where(eq(appointmentsTable.id, parseInt(id)))
       .returning();

@@ -148,6 +148,7 @@ type Appointment = {
   treatmentType: string
   appointmentDate: string
   money?: string | number
+  teethData?: string | any
 }
 
 interface PaymentFormData {
@@ -948,7 +949,37 @@ function ReportsPageContent() {
           : activeReport === "appointments"
           ? pdfAppointments
               .map(
-                (item, index) => `
+                (item, index) => {
+                  // Parse teeth data
+                  let teethData: Record<string, any> = {};
+                  try {
+                    if (item.teethData) {
+                      teethData = typeof item.teethData === 'string' 
+                        ? JSON.parse(item.teethData) 
+                        : item.teethData;
+                    }
+                  } catch (e) {
+                    teethData = {};
+                  }
+                  
+                  // Collect treated teeth
+                  const treatedTeeth = Object.entries(teethData)
+                    .filter(([_, toothInfo]) => {
+                      // Check if toothInfo is an object with status, or just a string
+                      const status = typeof toothInfo === 'object' && toothInfo !== null 
+                        ? toothInfo.status 
+                        : toothInfo;
+                      return status !== 'healthy' && status !== null && status !== undefined;
+                    })
+                    .map(([toothId, toothInfo]) => {
+                      const status = typeof toothInfo === 'object' && toothInfo !== null 
+                        ? toothInfo.status 
+                        : toothInfo;
+                      return `${toothId} (${status})`;
+                    })
+                    .join(', ');
+
+                  return `
                   <tr>
                     <td style="border:1px solid #d1d5db;padding:8px;text-align:center;">${index + 1}</td>
                     <td style="border:1px solid #d1d5db;padding:8px;">${formatDate(item.appointmentDate)}</td>
@@ -957,9 +988,11 @@ function ReportsPageContent() {
                     <td style="border:1px solid #d1d5db;padding:8px;">${item.phone}</td>
                     <td style="border:1px solid #d1d5db;padding:8px;">${item.age}</td>
                     <td style="border:1px solid #d1d5db;padding:8px;">${item.treatmentType}</td>
+                    <td style="border:1px solid #d1d5db;padding:8px;">${treatedTeeth || '-'}</td>
                     <td style="border:1px solid #d1d5db;padding:8px;">${formatAppointmentMoney(item.money || 0)}</td>
                   </tr>
-                `,
+                `;
+                },
               )
               .join("")
           : activeReport === "payment-history"
@@ -1132,6 +1165,7 @@ function ReportsPageContent() {
                     <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">تەلەفۆن</th>
                     <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">تەمەن</th>
                     <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">جۆری چارەسەری</th>
+                    <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">ددان</th>
                     <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">بڕی پارە</th>
                   ` : activeReport === "payment-history" ? `
                     <th style="border:1px solid #9ca3af;padding:8px;background:#f1f5f9;">ناوی نەخۆش</th>
@@ -1854,24 +1888,55 @@ function ReportsPageContent() {
                 <TableHead className={mobileTh}>تەلەفۆن</TableHead>
                 <TableHead className={mobileTh}>تەمەن</TableHead>
                 <TableHead className={mobileTh}>جۆری چارەسەری</TableHead>
+                <TableHead className={mobileTh}>ددان</TableHead>
                 <TableHead className={mobileTh}>بڕی پارە</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground">
                     ...چاوەڕوانبە
                   </TableCell>
                 </TableRow>
               ) : filteredAppointments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground hover:bg-transparent">
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground hover:bg-transparent">
                     هیچ نەخۆشێک تۆمار نەکراوە.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAppointments.map((appointment, index) => (
+                filteredAppointments.map((appointment, index) => {
+                  // Parse teeth data
+                  let teethData: Record<string, any> = {};
+                  try {
+                    if (appointment.teethData) {
+                      teethData = typeof appointment.teethData === 'string' 
+                        ? JSON.parse(appointment.teethData) 
+                        : appointment.teethData;
+                    }
+                  } catch (e) {
+                    teethData = {};
+                  }
+                  
+                  // Collect treated teeth
+                  const treatedTeeth = Object.entries(teethData)
+                    .filter(([_, toothInfo]) => {
+                      // Check if toothInfo is an object with status, or just a string
+                      const status = typeof toothInfo === 'object' && toothInfo !== null 
+                        ? toothInfo.status 
+                        : toothInfo;
+                      return status !== 'healthy' && status !== null && status !== undefined;
+                    })
+                    .map(([toothId, toothInfo]) => {
+                      const status = typeof toothInfo === 'object' && toothInfo !== null 
+                        ? toothInfo.status 
+                        : toothInfo;
+                      return `${toothId} (${status})`;
+                    })
+                    .join(', ');
+
+                  return (
                   <TableRow
                     key={appointment.id}
                     className={`transition-all duration-200 border-b border-gray-100 dark:border-gray-800 ${
@@ -1891,6 +1956,9 @@ function ReportsPageContent() {
                         {appointment.treatmentType}
                       </span>
                     </TableCell>
+                    <TableCell className={mobileTd}>
+                      {treatedTeeth || '-'}
+                    </TableCell>
                     <TableCell>
                       {appointment.money ? (
                         <span className="inline-flex h-5 items-center justify-center whitespace-nowrap rounded-4xl bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300">
@@ -1903,7 +1971,8 @@ function ReportsPageContent() {
                       )}
                     </TableCell>
                   </TableRow>
-                ))
+                  );
+                })
               )}
             </TableBody>
           </Table>

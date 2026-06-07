@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, Pencil, User, Calendar, TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Trash2, Pencil, User, Calendar, TrendingUp, DollarSign, AlertCircle, Smile } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/pagination';
 import {
@@ -51,6 +51,7 @@ import {
   mobileBtn,
 } from '@/components/dashboard-page-shell';
 import { MobileListToolbar, MobileCustomDateRange } from '@/components/mobile-list-toolbar';
+import { DentalChart, type TeethMap } from '@/components/dental-chart';
 
 interface Appointment {
   id: number;
@@ -62,6 +63,7 @@ interface Appointment {
   appointmentDate: string;
   money?: string | number;
   pending_sync?: boolean;
+  teethData?: string;
 }
 
 interface FormData {
@@ -72,6 +74,7 @@ interface FormData {
   treatmentType: string;
   appointmentDate: string;
   money: string;
+  teethData?: TeethMap;
 }
 
 const getTreatmentColor = (treatmentType: string) => {
@@ -137,7 +140,10 @@ export default function AppointmentsPage() {
     treatmentType: '',
     appointmentDate: '',
     money: '',
+    teethData: undefined,
   });
+
+  const [viewChartAppointment, setViewChartAppointment] = useState<Appointment | null>(null);
 
   const [paginationPage, setPaginationPage] = useState(1);
   const [paginationPageSize, setPaginationPageSize] = useState(10);
@@ -166,6 +172,7 @@ export default function AppointmentsPage() {
         treatmentType: item.body.treatmentType,
         appointmentDate: item.body.appointmentDate,
         money: item.body.money,
+        teethData: item.body.teethData ? JSON.stringify(item.body.teethData) : undefined,
         pending_sync: true,
       }));
     setOfflineItems(items);
@@ -265,14 +272,24 @@ export default function AppointmentsPage() {
       const body = editingAppointment 
         ? {
             id: editingAppointment.id,
-            ...formData,
+            name: formData.name,
+            gender: formData.gender,
+            phone: formData.phone,
             age: parseInt(formData.age),
+            treatmentType: formData.treatmentType,
+            appointmentDate: formData.appointmentDate,
             money: formData.money ? parseFloat(formData.money) : 0,
+            teethData: formData.teethData,
           }
         : {
-            ...formData,
+            name: formData.name,
+            gender: formData.gender,
+            phone: formData.phone,
             age: parseInt(formData.age),
+            treatmentType: formData.treatmentType,
+            appointmentDate: formData.appointmentDate,
             money: formData.money ? parseFloat(formData.money) : 0,
+            teethData: formData.teethData,
           };
 
       if (!navigator.onLine) {
@@ -369,6 +386,14 @@ export default function AppointmentsPage() {
 
   const handleEditAppointment = (appointment: Appointment) => {
     setEditingAppointment(appointment);
+    let parsedTeethData: TeethMap | undefined = undefined;
+    try {
+      if (appointment.teethData) {
+        parsedTeethData = JSON.parse(appointment.teethData);
+      }
+    } catch (e) {
+      parsedTeethData = undefined;
+    }
     setFormData({
       name: appointment.name,
       gender: appointment.gender,
@@ -377,6 +402,7 @@ export default function AppointmentsPage() {
       treatmentType: appointment.treatmentType,
       appointmentDate: appointment.appointmentDate,
       money: appointment.money?.toString() || '',
+      teethData: parsedTeethData,
     });
     setOpenDialog(true);
   };
@@ -599,13 +625,14 @@ export default function AppointmentsPage() {
               <TableHead className={mobileTh}>جۆری چارەسەری</TableHead>
               <TableHead className={mobileTh}>بەروار</TableHead>
               <TableHead className={mobileTh}>بڕی پارە</TableHead>
+              <TableHead className={`${mobileTh} text-center`}>چارتی ددان</TableHead>
               <TableHead className={`${mobileTh} text-center`}>کردار</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedAppointments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground hover:bg-transparent">
+                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground hover:bg-transparent">
                   <div className="flex flex-col items-center gap-2">
                     <User className="w-12 h-12 opacity-30 mx-auto" />
                     <span className="text-sm sm:text-lg">{searchTerm ? 'هیچ نەخۆشێک نەدۆزرایەوە !' : 'هیچ چاوپێکەوتن نیە'}</span>
@@ -654,6 +681,17 @@ export default function AppointmentsPage() {
                         -
                       </span>
                     )}
+                  </TableCell>
+                  <TableCell className={`${mobileTd} text-center`}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setViewChartAppointment(appointment)}
+                      className="h-8 w-8 p-0 text-teal-600 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900"
+                      title="چارتی ددان"
+                    >
+                      <Smile className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </Button>
                   </TableCell>
                   <TableCell className={`${mobileTd} text-center`}>
                     <div className="flex items-center justify-center gap-0.5 sm:gap-1">
@@ -711,10 +749,11 @@ export default function AppointmentsPage() {
             treatmentType: '',
             appointmentDate: '',
             money: '',
+            teethData: undefined,
           });
         }
       }}>
-        <DialogContent dir="rtl" className={mobileDialogContent}>
+        <DialogContent dir="rtl" className="w-[calc(100%-2rem)] max-w-[30rem] sm:max-w-6xl p-3 sm:p-8 gap-4 sm:gap-6 max-h-[95vh] overflow-y-auto">
           <DialogHeader className="gap-0.5 sm:gap-2 pb-0">
             <DialogTitle className="text-center text-sm sm:text-base font-bold">
               {editingAppointment ? 'دەستکاریکردنی نەخۆش' : 'زیادکردنی نەخۆش'}
@@ -724,110 +763,121 @@ export default function AppointmentsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleAddAppointment} className="space-y-2.5 sm:space-y-4">
-            <div className="space-y-2 sm:space-y-3">
-              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ناو</label>
-                <Input
-                  className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="ناوی نەخۆش"
-                  required
-                />
-              </div>
+          <form onSubmit={handleAddAppointment} className="space-y-3 sm:space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Patient Info */}
+              <div className="space-y-3 sm:space-y-4 pt-1">
+                <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ناو</label>
+                  <Input
+                    className="sm:col-span-2 h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="ناوی نەخۆش"
+                    required
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3">
-                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ڕەگەز</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-4">
+                  <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">ڕەگەز</label>
+                    <div className="sm:col-span-2">
+                      <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
+                        <SelectTrigger className="h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary">
+                          <SelectValue placeholder="ڕەگەز" />
+                        </SelectTrigger>
+                        <SelectContent dir="rtl">
+                          <SelectItem value="نێر">نێر</SelectItem>
+                          <SelectItem value="مێ">مێ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەمەن</label>
+                    <Input
+                      className="sm:col-span-2 h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary"
+                      name="age"
+                      type="number"
+                      value={formData.age}
+                      onChange={handleInputChange}
+                      placeholder="تەمەن"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                  <div className="flex items-center gap-1 sm:col-span-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">ژ.تەلەفۆن</label>
+                    <span className="text-[10px] text-muted-foreground">(ئارەزوومەندانە)</span>
+                  </div>
+                  <Input
+                    className="sm:col-span-2 h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="07701234567"
+                  />
+                </div>
+
+                <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">چارەسەر</label>
                   <div className="sm:col-span-2">
-                    <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
-                      <SelectTrigger className="h-9 sm:h-10 text-base sm:text-sm">
-                        <SelectValue placeholder="ڕەگەز" />
+                    <Select value={formData.treatmentType} onValueChange={(value) => handleSelectChange('treatmentType', value)}>
+                      <SelectTrigger className="h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary">
+                        <SelectValue placeholder="جۆری چارەسەر" />
                       </SelectTrigger>
                       <SelectContent dir="rtl">
-                        <SelectItem value="نێر">نێر</SelectItem>
-                        <SelectItem value="مێ">مێ</SelectItem>
+                        <SelectItem value="شۆردنی دندان">شۆردنی ددان</SelectItem>
+                        <SelectItem value="تەلی ددان"> تەلی ددان</SelectItem>
+                        <SelectItem value="پڕکردنەوەی ددان"> پڕکردنەوەی ددان</SelectItem>
+                        <SelectItem value=" ‌هەڵقەندنی ددان"> ‌هەڵقەندنی ددان </SelectItem>
+                        <SelectItem value="هی تر">  هی تر </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">تەمەن</label>
-                  <Input
-                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
-                    name="age"
-                    type="number"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    placeholder="تەمەن"
-                    required
-                  />
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-4">
+                  <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بەروار</label>
+                    <Input
+                      className="sm:col-span-2 h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary"
+                      name="appointmentDate"
+                      type="date"
+                      value={formData.appointmentDate}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:grid sm:grid-cols-3 sm:items-center sm:gap-3">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">پارە</label>
+                    <Input
+                      className="sm:col-span-2 h-10 sm:h-11 text-base sm:text-sm border-2 border-gray-200 dark:border-gray-700 focus:border-primary"
+                      name="money"
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.money ? Number(formData.money).toLocaleString('en-US') : ''}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/,/g, '');
+                        if (rawValue === '' || /^\d*\.?\d*$/.test(rawValue)) {
+                          handleInputChange({ target: { name: 'money', value: rawValue } } as React.ChangeEvent<HTMLInputElement>);
+                        }
+                      }}
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                <div className="flex items-center gap-1 sm:col-span-1">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">ژ.تەلەفۆن</label>
-                  <span className="text-[10px] text-muted-foreground">(ئارەزوومەندانە)</span>
-                </div>
-                <Input
-                  className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="07701234567"
+              {/* Dental Chart */}
+              <div className="border-t lg:border-t-0 lg:border-l border-border/50 pt-3 lg:pt-0 lg:pl-5">
+                <DentalChart
+                  value={formData.teethData || {}}
+                  onChange={(newTeethData) => setFormData(prev => ({ ...prev, teethData: newTeethData }))}
                 />
-              </div>
-
-              <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">چارەسەر</label>
-                <div className="sm:col-span-2">
-                  <Select value={formData.treatmentType} onValueChange={(value) => handleSelectChange('treatmentType', value)}>
-                    <SelectTrigger className="h-9 sm:h-10 text-base sm:text-sm">
-                      <SelectValue placeholder="جۆری چارەسەر" />
-                    </SelectTrigger>
-                    <SelectContent dir="rtl">
-                      <SelectItem value="شۆردنی دندان">شۆردنی ددان</SelectItem>
-                      <SelectItem value="تەلی ددان"> تەلی ددان</SelectItem>
-                      <SelectItem value="پڕکردنەوەی ددان"> پڕکردنەوەی ددان</SelectItem>
-                      <SelectItem value=" ‌هەڵقەندنی دندان"> ‌هەڵقەندنی ددان </SelectItem>
-                      <SelectItem value="هی تر">  هی تر </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3">
-                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">بەروار</label>
-                  <Input
-                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
-                    name="appointmentDate"
-                    type="date"
-                    value={formData.appointmentDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-1 sm:grid sm:grid-cols-3 sm:items-center sm:gap-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 sm:col-span-1">پارە</label>
-                  <Input
-                    className="sm:col-span-2 h-9 sm:h-10 text-base sm:text-sm"
-                    name="money"
-                    type="text"
-                    inputMode="numeric"
-                    value={formData.money ? Number(formData.money).toLocaleString('en-US') : ''}
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/,/g, '');
-                      if (rawValue === '' || /^\d*\.?\d*$/.test(rawValue)) {
-                        handleInputChange({ target: { name: 'money', value: rawValue } } as React.ChangeEvent<HTMLInputElement>);
-                      }
-                    }}
-                    placeholder="0"
-                  />
-                </div>
               </div>
             </div>
 
@@ -849,6 +899,46 @@ export default function AppointmentsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dental Chart Dialog */}
+      <Dialog open={viewChartAppointment !== null} onOpenChange={(open) => {
+        if (!open) setViewChartAppointment(null);
+      }}>
+        <DialogContent dir="rtl" className="w-[calc(100%-2rem)] max-w-[30rem] sm:max-w-5xl p-3 sm:p-8 gap-4 sm:gap-6 max-h-[95vh] overflow-y-auto">
+          <DialogHeader className="gap-0.5 sm:gap-2 pb-0">
+            <DialogTitle className="text-center text-sm sm:text-base font-bold">
+              {viewChartAppointment?.name} - چارتی ددان
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            {(() => {
+              let chartData: TeethMap = {};
+              try {
+                if (viewChartAppointment?.teethData) {
+                  chartData = JSON.parse(viewChartAppointment.teethData);
+                }
+              } catch (e) {
+                chartData = {};
+              }
+              return (
+                <DentalChart
+                  value={chartData}
+                  onChange={() => {}}
+                  readOnly
+                />
+              );
+            })()}
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setViewChartAppointment(null)}
+            >
+              داخستن
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

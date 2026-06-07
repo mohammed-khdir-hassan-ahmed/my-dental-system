@@ -17,6 +17,7 @@ export const appointmentsTable = pgTable('appointments_table', {
   treatmentType: text('treatment_type').notNull(),
   appointmentDate: date('appointment_date').notNull(),
   money: numeric('money', { precision: 10, scale: 2 }).default('0'),
+  teethData: text('teeth_data').default(null),
   createdAt: date('created_at').defaultNow(),
 });
 
