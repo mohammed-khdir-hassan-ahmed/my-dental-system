@@ -407,62 +407,6 @@ export default function SettingsPage() {
         </SettingsCard>
       )}
 
-      {/* Backup & Restore Section */}
-      <SettingsCard
-        icon={DownloadIcon}
-        title="بەکاپ و گەڕانەوەی دەیتا"
-        description="بەکاپی بەکارهێنانی دەیتاکانی تۆمارەکان بکە و لە دەستکەوتنەوەدا بەکاربێنەوە"
-      >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-3">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                دەیتاکانی تۆماری نەخۆش، خرج، فروش و هەموو شتێک بە فایلی JSON خزایەندرێت
-              </p>
-              <Button
-                onClick={handleBackup}
-                disabled={backupLoading}
-                className="bg-[#3dc1d3] hover:bg-[#35aebb] w-full flex items-center justify-center gap-2"
-              >
-                {backupLoading ? (
-                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <DownloadIcon className="h-4 w-4" />
-                )}
-                {backupLoading ? 'دەستکەوتنەوەی بەکاپ...' : 'دروستکردنی بەکاپ'}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                فایلی بەکاپی پێشوەت بخێنە و دەیتاکانت گەڕانەوەبکە
-              </p>
-              <input
-                type="file"
-                accept=".json"
-                ref={fileInputRef}
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={restoreLoading}
-                className="bg-green-600 hover:bg-green-700 w-full flex items-center justify-center gap-2"
-              >
-                {restoreLoading ? (
-                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <UploadIcon className="h-4 w-4" />
-                )}
-                {restoreLoading ? 'گەڕانەوەی دەیتا...' : 'گەڕانەوەی دەیتا لە فایل'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </SettingsCard>
-
       {user?.isAdmin && (
         <SettingsCard
           icon={ShieldIcon}
@@ -472,6 +416,87 @@ export default function SettingsPage() {
           <AdminUserManagement />
         </SettingsCard>
       )}
+      
+      {/* Backup & Restore Section */}
+      <SettingsCard
+        icon={DownloadIcon}
+        title="بەکاپ و گەڕانەوەی دەیتا"
+        description="بەکاپی تەواو دەیتا بکە، لە دەستکەوتنەوەی هەڵەکان پشتبەی دەیتاکانت بگرە"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Backup Card */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 border border-blue-100 dark:border-slate-600">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-blue-100 dark:bg-slate-600 rounded-full">
+                <DownloadIcon className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">دروستکردنی بەکاپ</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">فایلی JSON لە تەواو دەیتا</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              دەیتاکانی نەخۆش، خرج، فروش، مۆچی، و هەموو زانیارییەکان بە فایلی ئاسان خزایەندرێت
+            </p>
+            <Button
+              onClick={handleBackup}
+              disabled={backupLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg shadow-blue-200 dark:shadow-none"
+            >
+              {backupLoading ? (
+                <RefreshCwIcon className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <DownloadIcon className="h-4 w-4 mr-2" />
+              )}
+              {backupLoading ? 'دەستکەوتنەوەی بەکاپ...' : 'دروستکردنی بەکاپ (Download)'}
+            </Button>
+          </div>
+
+          {/* Restore Card */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 border border-green-100 dark:border-slate-600">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-green-100 dark:bg-slate-600 rounded-full">
+                <UploadIcon className="h-5 w-5 text-green-600 dark:text-green-300" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">گەڕانەوەی دەیتا</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">فایلی بەکاپی پێشوەت بخێنەرەوە</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              فایلی بەکاپی پێشوەت بخێنە و دەیتاکانت بە تەواوی گەڕانەوەبکە
+            </p>
+            <input
+              type="file"
+              accept=".json"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={restoreLoading}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-200 dark:shadow-none"
+            >
+              {restoreLoading ? (
+                <RefreshCwIcon className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <UploadIcon className="h-4 w-4 mr-2" />
+              )}
+              {restoreLoading ? 'گەڕانەوەی دەیتا...' : 'خستنەڕووی فایل و گەڕانەوە'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Info Banner */}
+        <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3">
+          <CheckCircleIcon className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-800 dark:text-amber-200">
+            <p className="font-medium mb-1">رێکخستن</p>
+            <p>بەکاپ لە مانگدا جارێک بکە! لە کاتی گەڕانەوەدا، ئەو ریکۆردانەی کە پێشتر هەبوون دەستنیشان دەکەن، تەنها تازەکان زیاد دەکرێن</p>
+          </div>
+        </div>
+      </SettingsCard>
       </div>
 
       <Dialog open={showEmailSuccessModal} onOpenChange={setShowEmailSuccessModal}>
