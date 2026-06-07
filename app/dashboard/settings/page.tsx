@@ -420,15 +420,15 @@ export default function SettingsPage() {
       {/* Backup & Restore Section */}
       <SettingsCard
         icon={DownloadIcon}
-        title="بەکاپ و گەڕانەوەی دەیتا"
-        description="بەکاپی تەواو دەیتا بکە، لە دەستکەوتنەوەی هەڵەکان پشتبەی دەیتاکانت بگرە"
+        title="پاراستنی هەموو داتا و زانیاریەکانی سیستەم"
+        description="لەم بەشە دەتوانی هەموو زانیاریەکان بپارێزیت."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Backup */}
           <div className="space-y-4">
-            <SettingsField label="دروستکردنی بەکاپ">
+            <SettingsField label="پاراستن و دروستکردنی فایلی JSON-BACKUP">
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                دەیتاکانی نەخۆش، خرج، فروش، مۆچی، و هەموو زانیارییەکان بە فایلی JSON خزایەندرێت
+                داتاکانی هەموو نەخۆشەکان لێرە دەتوانی دابگری لەڕێگای فایلی JSON
               </p>
               <Button
                 onClick={handleBackup}
@@ -440,16 +440,16 @@ export default function SettingsPage() {
                 ) : (
                   <DownloadIcon className="h-4 w-4 mr-2" />
                 )}
-                {backupLoading ? 'دەستکەوتنەوەی بەکاپ...' : 'دروستکردنی بەکاپ (Download)'}
+                {backupLoading ? 'دەستکەوتنەوەی بەکاپ...' : ' Download'}
               </Button>
             </SettingsField>
           </div>
 
           {/* Restore */}
           <div className="space-y-4">
-            <SettingsField label="گەڕانەوەی دەیتا">
+            <SettingsField label="گەڕاندنەوەی هەموو زانیاریەکان">
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                فایلی بەکاپی پێشوەت بخێنە و دەیتاکانت بە تەواوی گەڕانەوەبکە
+فایلی خەزنکراو لێرە ‌هەڵبگرە و داتا و زانیارییە خەزنکراوەکان بگەڕێننەوە...
               </p>
               <input
                 type="file"
@@ -468,7 +468,7 @@ export default function SettingsPage() {
                 ) : (
                   <UploadIcon className="h-4 w-4 mr-2" />
                 )}
-                {restoreLoading ? 'گەڕانەوەی دەیتا...' : 'خستنەڕووی فایل و گەڕانەوە'}
+                {restoreLoading ? 'گەڕاندنەوەی هەموو زانیاریەکان...' : ' Upload'}
               </Button>
             </SettingsField>
           </div>
@@ -479,7 +479,7 @@ export default function SettingsPage() {
           <CheckCircleIcon className="h-5 w-5 text-[#3dc1d3] shrink-0 mt-0.5" />
           <div className="text-sm text-gray-700 dark:text-gray-300">
             <p className="font-medium mb-1">رێکخستن</p>
-            <p>بەکاپ لە مانگدا جارێک بکە! لە کاتی گەڕانەوەدا، ئەو ریکۆردانەی کە پێشتر هەبوون دەستنیشان دەکەن، تەنها تازەکان زیاد دەکرێن</p>
+            <p>مانگی جارێک Backup بکە لە کاتی گەڕاندنەوەدا، تۆمارە کۆنەکان دەناسرێنەوە و تەنها زانیارییە نوێیەکان زیاد دەکرێن.</p>
           </div>
         </div>
       </SettingsCard>
