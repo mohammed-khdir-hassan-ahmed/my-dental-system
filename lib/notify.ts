@@ -316,3 +316,8 @@ export function notifyAdminUserLogin(
 export function notifyActionError(message: string, title = 'هەڵە') {
   notify({ type: 'error', title, message, isError: true })
 }
+
+// ——— سەرکەوتوو ———
+export function notifySuccess(message: string, title = 'سەرکەوتوو') {
+  notify({ type: 'success', title, message, sound: 'sale' })
+}
