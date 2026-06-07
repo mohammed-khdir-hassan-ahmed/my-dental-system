@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MailIcon, LockIcon, KeyIcon, CheckCircleIcon, ShieldIcon } from "lucide-react"
+import { MailIcon, LockIcon, KeyIcon, CheckCircleIcon, ShieldIcon, DownloadIcon, UploadIcon, RefreshCwIcon } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
-import { notifySettingsUpdated, notifyActionError } from "@/lib/notify"
+import { notifySettingsUpdated, notifyActionError, notifySuccess } from "@/lib/notify"
 import { DashboardPageShell, mobileDialogContent } from "@/components/dashboard-page-shell"
 import { AdminUserManagement } from "@/components/admin-user-management"
 import {
@@ -41,6 +42,67 @@ export default function SettingsPage() {
   const [showOTPSuccessModal, setShowOTPSuccessModal] = useState(false)
   const [showEmailSuccessModal, setShowEmailSuccessModal] = useState(false)
   const [showPasswordSuccessModal, setShowPasswordSuccessModal] = useState(false)
+  const [backupLoading, setBackupLoading] = useState(false)
+  const [restoreLoading, setRestoreLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleBackup = async () => {
+    setBackupLoading(true)
+    try {
+      const response = await fetch('/api/backup')
+      if (!response.ok) throw new Error('Failed to create backup')
+
+      // Download file
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const contentDisposition = response.headers.get('Content-Disposition')
+      const filenameMatch = contentDisposition?.match(/filename="?([^";]+)"?/)
+      const filename = filenameMatch ? filenameMatch[1] : `dental-system-backup-${new Date().toISOString().split('T')[0]}.json`
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      notifySuccess('بەکاپ بە سەرکەوتوویی دروستکرا و خزایەندرا')
+    } catch (error) {
+      console.error(error)
+      notifyActionError('هەڵەیەک ڕویدا لە دروستکردنی بەکاپ')
+    } finally {
+      setBackupLoading(false)
+    }
+  }
+
+  const handleRestore = async (file: File) => {
+    setRestoreLoading(true)
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      
+      const response = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) throw new Error('Failed to restore')
+      
+      notifySuccess('دەیتاکان بە سەرکەوتوویی گەڕانەوەکران!')
+    } catch (error) {
+      console.error(error)
+      notifyActionError('هەڵەیەک ڕویدا لە گەڕانەوەی دەیتاکان')
+    } finally {
+      setRestoreLoading(false)
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleRestore(file)
+    }
+  }
 
   const handleOTPInput = (value: string, setter: (val: string) => void, field: 'newOTP' | 'confirmOTP') => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 6)
@@ -344,6 +406,62 @@ export default function SettingsPage() {
           </form>
         </SettingsCard>
       )}
+
+      {/* Backup & Restore Section */}
+      <SettingsCard
+        icon={DownloadIcon}
+        title="بەکاپ و گەڕانەوەی دەیتا"
+        description="بەکاپی بەکارهێنانی دەیتاکانی تۆمارەکان بکە و لە دەستکەوتنەوەدا بەکاربێنەوە"
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-3">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                دەیتاکانی تۆماری نەخۆش، خرج، فروش و هەموو شتێک بە فایلی JSON خزایەندرێت
+              </p>
+              <Button
+                onClick={handleBackup}
+                disabled={backupLoading}
+                className="bg-[#3dc1d3] hover:bg-[#35aebb] w-full flex items-center justify-center gap-2"
+              >
+                {backupLoading ? (
+                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <DownloadIcon className="h-4 w-4" />
+                )}
+                {backupLoading ? 'دەستکەوتنەوەی بەکاپ...' : 'دروستکردنی بەکاپ'}
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                فایلی بەکاپی پێشوەت بخێنە و دەیتاکانت گەڕانەوەبکە
+              </p>
+              <input
+                type="file"
+                accept=".json"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={restoreLoading}
+                className="bg-green-600 hover:bg-green-700 w-full flex items-center justify-center gap-2"
+              >
+                {restoreLoading ? (
+                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <UploadIcon className="h-4 w-4" />
+                )}
+                {restoreLoading ? 'گەڕانەوەی دەیتا...' : 'گەڕانەوەی دەیتا لە فایل'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </SettingsCard>
 
       {user?.isAdmin && (
         <SettingsCard
